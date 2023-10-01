@@ -12,10 +12,11 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
   const {error, parsed} = config({});
   if (!error) {
     parsedEnvs = dotenvParseVariables(parsed) as IEnvs;
+    console.log("Got variables from .env file");
   }
 }
 
-export const {DB_URI, PRODUCTION, PORT = 3000} = parsedEnvs;
+export const {DB_URI, PRODUCTION, PORT = 3000} = parsedEnvs || process.env;
 
 
 

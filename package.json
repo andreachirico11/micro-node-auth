@@ -4,8 +4,8 @@
   "description": "Microservice to manage multiple application authentication process",
   "scripts": {
     "dev": "nodemon",
-    "build-prod": "tsc -p tsconfig.production.json",
-    "start": "tsc -p tsconfig.production.json && node index.js"
+    "build": "tsc -p tsconfig.production.json",
+    "start": "node dist/index.js"
   },
   "author": "Andrea Chirico",
   "devDependencies": {
