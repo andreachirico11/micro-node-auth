@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Microservice to manage multiple application authentication process",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "nodemon --inspect src/index.ts",
     "build": "tsc -p tsconfig.production.json",
     "start": "node dist/index.js"
   },
