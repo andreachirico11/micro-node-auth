@@ -1,13 +1,16 @@
-import { DataTypes, Sequelize } from "sequelize";
+import {  Sequelize } from "sequelize";
 import * as express from 'express';
-import {DB_URI, PRODUCTION, PORT} from './utils/Envs'
-import { PingTest, PingTestInit } from "./models/PingTest";
+import {pingTestInit} from "./models/PingTest";
+import initTables from "./utils/initTables";
 import router from "./routes";
+
+import {DB_URI, PRODUCTION, PORT, BASE_URL} from './utils/Envs'
 
 console.info("APP CONFIGS -----------");
 console.info("PRODUCTION: ", PRODUCTION);
 console.info("DB_URI: ", DB_URI);
 console.info("PORT: ", PORT);
+console.info("BASE_URL: ", BASE_URL);
 console.info("-----------------------\n\n");
 
 const sequelize = new Sequelize(DB_URI, {...PRODUCTION && {
@@ -17,11 +20,13 @@ const sequelize = new Sequelize(DB_URI, {...PRODUCTION && {
     },
   }
 }});
-PingTestInit(sequelize);
-
+initTables(sequelize, pingTestInit);
 
 const app = express();
-app.use(router);
+app.use('/' + BASE_URL, router);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 (async function () {
   await sequelize.sync();

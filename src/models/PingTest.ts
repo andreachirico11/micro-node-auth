@@ -4,7 +4,7 @@ export class PingTest extends Model<InferAttributes<PingTest>, InferCreationAttr
   declare name: string;
 }
 
-export function PingTestInit(sequelize: Sequelize) {
+export function pingTestInit(sequelize: Sequelize) {
   PingTest.init(
     {
       name: {

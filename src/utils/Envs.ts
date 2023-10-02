@@ -1,11 +1,7 @@
 import {config} from 'dotenv';
 import * as dotenvParseVariables from "dotenv-parse-variables";
+import IEnvs from '../types/IEnvs';
 
-interface IEnvs extends dotenvParseVariables.ParsedVariables {
-  PRODUCTION: boolean;
-  DB_URI: string;
-  PORT: number;
-}
 
 let parsedEnvs: IEnvs;
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
@@ -16,7 +12,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
   }
 }
 
-export const {DB_URI, PRODUCTION, PORT} = parsedEnvs || process.env;
+export const {DB_URI, PRODUCTION, PORT, BASE_URL} = parsedEnvs || process.env;
 
 
 
