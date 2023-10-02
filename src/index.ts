@@ -1,14 +1,14 @@
 import { DataTypes, Sequelize } from "sequelize";
 import * as express from 'express';
 import {DB_URI, PRODUCTION, PORT} from './utils/Envs'
+import { PingTest, PingTestInit } from "./models/PingTest";
+import router from "./routes";
 
 console.info("APP CONFIGS -----------");
 console.info("PRODUCTION: ", PRODUCTION);
 console.info("DB_URI: ", DB_URI);
 console.info("PORT: ", PORT);
 console.info("-----------------------\n\n");
-
-const app = express();
 
 const sequelize = new Sequelize(DB_URI, {...PRODUCTION && {
   dialectOptions: {
@@ -17,21 +17,14 @@ const sequelize = new Sequelize(DB_URI, {...PRODUCTION && {
     },
   }
 }});
+PingTestInit(sequelize);
 
-const PingTests = sequelize.define('pingTest', {
-  name: {
-    type: DataTypes.STRING,
-  },
-});
 
-app.all('/', (req, res) => {
-  PingTests.findAll({ attributes: ['name'] }).then((tests) => {
-    res.send(tests.length ? tests[0]['name'] : 'no tests');
-  });
-});
+const app = express();
+app.use(router);
 
 (async function () {
-  await sequelize.authenticate();
+  await sequelize.sync();
   console.info("Db auth completed\n");
   app.listen(PORT, () => {
     console.info("Listening on port: " + PORT);

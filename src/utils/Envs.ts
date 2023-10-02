@@ -16,7 +16,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
   }
 }
 
-export const {DB_URI, PRODUCTION, PORT = 3000} = parsedEnvs || process.env;
+export const {DB_URI, PRODUCTION, PORT} = parsedEnvs || process.env;
 
 
 
