@@ -1,0 +1,37 @@
+import { Response } from 'express';
+import { ErrorCodes, VALIDATION } from './ErrorCodes';
+
+const sender = (res: Response, status, json: any) => res.status(status).json(json);
+
+export class SuccessResponse {
+  constructor(res: Response, payload?: any) {
+    if (!!payload && typeof payload === 'string') {
+        payload = {message: payload};
+    }
+    sender(res, 200, {success: true, payload});
+  }
+}
+
+abstract class ErrorResponse {
+    constructor(res: Response, status: number, errCode: ErrorCodes) {
+        sender(res, status, {success: false, errCode});
+    }
+}
+
+export class ServerErrorResp extends ErrorResponse {
+    constructor(res: Response, errCode: ErrorCodes) {
+        super(res, 500, errCode);
+    }
+}
+
+export class NotFoundResp extends ErrorResponse {
+    constructor(res: Response, errCode: ErrorCodes) {
+        super(res, 404, errCode);
+    }
+}
+
+export class ValidationErrResp extends ErrorResponse {
+    constructor(res: Response) {
+        super(res, 422, VALIDATION);
+    }
+}

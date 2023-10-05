@@ -1,10 +1,9 @@
-import { RequestHandler } from "express";
-import { PingTest } from "../models/PingTest";
+import { RequestHandler } from 'express';
+import { log_warn } from '../utils/log';
+import { NotFoundResp } from '../types/ApiResponses';
+import { UNSUPPORTED_URL } from '../types/ErrorCodes';
 
 export const unsupportedUrl: RequestHandler = (req, res) => {
-  console.log("Unsupported Url");
-  return res.json({
-    "message": "This url doesn't exists"
-  })
-    
-  }
+  log_warn('Unsupported Url');
+  new NotFoundResp(res, UNSUPPORTED_URL);
+};

@@ -1,37 +1,32 @@
-import {  Sequelize } from "sequelize";
-import * as express from 'express';
-import {pingTestInit} from "./models/PingTest";
-import initTables from "./utils/initTables";
-import router from "./routes";
 
-import {DB_URI, PRODUCTION, PORT, BASE_URL} from './utils/Envs'
-
-console.info("APP CONFIGS -----------");
-console.info("PRODUCTION: ", PRODUCTION);
-console.info("DB_URI: ", DB_URI);
-console.info("PORT: ", PORT);
-console.info("BASE_URL: ", BASE_URL);
-console.info("-----------------------\n\n");
-
-const sequelize = new Sequelize(DB_URI, {...PRODUCTION && {
-  dialectOptions: {
-    ssl: {
-      rejectUnauthorized: true,
-    },
-  }
-}});
-initTables(sequelize, pingTestInit);
-
-const app = express();
-app.use('/' + BASE_URL, router);
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
+import { PORT } from './utils/Envs';
+import { log_error, log_fatal, log_info } from './utils/log';
+import sequelize from './configs/sequelize';
+import express from './configs/express';
+import { Application } from 'express';
 
 (async function () {
-  await sequelize.sync();
-  console.info("Db auth completed\n");
+
+  let app: Application;
+
+  try {
+    app = express();
+  } catch(e) {
+    log_error(e, 'Error Configuring Express');
+  }
+
+  try {
+    const seq = sequelize();
+    await seq.sync();
+    log_info('Connected to Db');
+  } catch (e) {
+    log_error(e, 'Error with Database Connection');
+  }
+
   app.listen(PORT, () => {
-    console.info("Listening on port: " + PORT);
+    log_info('Listening on port: ' + PORT);
+  }).on("error", () => {
+    log_fatal("App listen Crashed")
   });
+
 })();
