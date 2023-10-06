@@ -6,7 +6,7 @@ import {
   ModelAttributes,
   Sequelize,
 } from 'sequelize';
-import { App } from './App';
+import { AppModel } from './App';
 
 const tableName = 'Users';
 
@@ -59,5 +59,5 @@ export function userInit(sequelize: Sequelize) {
 }
 
 export function relateUser() {
-  User.belongsTo(App);
+  User.belongsTo(AppModel);
 }

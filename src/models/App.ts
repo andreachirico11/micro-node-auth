@@ -27,7 +27,15 @@ const attributes: ModelAttributes = {
   }
 };
 
-export class App extends Model<InferAttributes<App>, InferCreationAttributes<App>> {
+
+export interface IApp {
+  _id?: number;
+  name: string;
+  dateAdd: Date;
+  users?: number[];
+}
+
+export class AppModel extends Model<InferAttributes<AppModel>, InferCreationAttributes<AppModel>> implements IApp  {
   declare _id: number;
   declare name: string;
   declare dateAdd: Date;
@@ -36,14 +44,14 @@ export class App extends Model<InferAttributes<App>, InferCreationAttributes<App
 
 
 export function appInit(sequelize: Sequelize) {
-  App.init(attributes, {
+  AppModel.init(attributes, {
     sequelize,
     tableName,
   });
 }
 
 export function relateApp() {
-  App.hasMany(User, {
+  AppModel.hasMany(User, {
     foreignKey: 'users',
     onDelete: 'CASCADE'
   });

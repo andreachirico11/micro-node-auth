@@ -8,7 +8,7 @@ export class SuccessResponse {
     if (!!payload && typeof payload === 'string') {
         payload = {message: payload};
     }
-    sender(res, 200, {success: true, payload});
+    sender(res, 200, {success: true, ...payload && {payload}});
   }
 }
 

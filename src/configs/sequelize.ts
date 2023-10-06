@@ -12,6 +12,9 @@ const sequelizeOptions: Options = {
       },
     },
   }),
+  define: {
+    timestamps: false
+  }
 };
 
 export default function () {
