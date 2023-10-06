@@ -6,5 +6,4 @@ export const appValidator = object({
   _id: number().optional(),
   name: string().required(),
   dateAdd: date().required(),
-  users: array().optional().of(number()),
 }).required();

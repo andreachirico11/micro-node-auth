@@ -15,15 +15,14 @@ const _pino = pino({
 
 const mesageParser = (input: Object, label?: string) => {
   const parser = (str, key) => `${str}\n${key}: ${input[key]}`; 
-  const output = '{' + Object.keys(input).reduce(parser, '') + '\n}';
-  return !!label ? label + '\n' + output : output;
+  return '{' + Object.keys(input).reduce(parser, '') + '\n}';
 };
 
 const logger = (logFn: LogFn, input: any, label?: string) => {
   if (typeof input === "object" && !(input instanceof Error)) {
     input = mesageParser(input, label);
   }
-  logFn.bind(_pino)(input);
+  logFn.bind(_pino)(!!label ? label + '\n' + input : input);
   return input;
 }; 
 

@@ -10,6 +10,7 @@ export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   try {
     log_info(body, 'Creating new app with data: ');
     await AppModel.create(body);
+    log_info('Success');
     return new SuccessResponse(res)
   } catch(e) {
     log_error(e, 'Error creating new app');

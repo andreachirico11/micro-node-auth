@@ -1,7 +1,7 @@
 
 import { PORT } from './utils/Envs';
 import { log_error, log_fatal, log_info } from './utils/log';
-import sequelize from './configs/sequelize';
+import initSequelize from './configs/sequelize';
 import express from './configs/express';
 import { Application } from 'express';
 
@@ -16,8 +16,7 @@ import { Application } from 'express';
   }
 
   try {
-    const seq = sequelize();
-    await seq.sync();
+    await initSequelize();
     log_info('Connected to Db');
   } catch (e) {
     log_error(e, 'Error with Database Connection');

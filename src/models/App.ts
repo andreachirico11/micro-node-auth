@@ -6,6 +6,7 @@ import {
   ModelAttributes,
   Sequelize,
 } from 'sequelize';
+import { UserModel } from './User';
 
 const tableName = 'Apps';
 
@@ -14,36 +15,32 @@ const attributes: ModelAttributes = {
     type: DataTypes.INTEGER,
     primaryKey: true,
     allowNull: false,
-    autoIncrement: true
+    autoIncrement: true,
   },
-  name: {    
+  name: {
     type: DataTypes.STRING(100),
-    allowNull: false
+    allowNull: false,
   },
   dateAdd: {
     type: DataTypes.DATE,
-    allowNull: false
-  },
-  user_id: {
-    type: DataTypes.INTEGER,
+    allowNull: false,
   },
 };
-
 
 export interface IApp {
   _id?: number;
   name: string;
   dateAdd: Date;
-  user_id?: number;
 }
 
-export class AppModel extends Model<InferAttributes<AppModel>, InferCreationAttributes<AppModel>> implements IApp  {
+export class AppModel
+  extends Model<InferAttributes<AppModel>, InferCreationAttributes<AppModel>>
+  implements IApp
+{
   declare _id: number;
   declare name: string;
   declare dateAdd: Date;
-  declare user_id?: number;
 }
-
 
 export function appInit(sequelize: Sequelize) {
   AppModel.init(attributes, {

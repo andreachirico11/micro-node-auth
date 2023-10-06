@@ -6,7 +6,6 @@ import {
   ModelAttributes,
   Sequelize,
 } from 'sequelize';
-import { AppModel } from './App';
 
 const tableName = 'Users';
 
@@ -37,22 +36,37 @@ const attributes: ModelAttributes = {
   },
   dateTokenExp: {
     type: DataTypes.DATE,
-  }
+  },
+  app_id: {
+    type: DataTypes.INTEGER,
+  },
 };
 
-export class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+export interface IUser {
+  _id: number;
+  name: string;
+  dateAdd: Date;
+  password: string;
+  datePasswordChange?: Date;
+  dateTokenExp?: Date;
+  resetToken?: string;
+  app_id?: number;
+}
+
+export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> implements IUser {
   declare _id: number;
   declare name: string;
   declare dateAdd: Date;
   declare password: string;
-  declare datePasswordChange: Date;
-  declare dateTokenExp: Date;
-  declare resetToken: string;
+  declare datePasswordChange?: Date;
+  declare dateTokenExp?: Date;
+  declare resetToken?: string;
+  declare app_id?: number;
 }
 
 
 export function userInit(sequelize: Sequelize) {
-  User.init(attributes, {
+  UserModel.init(attributes, {
     sequelize,
     tableName,
   });

@@ -20,7 +20,7 @@ const sequelizeOptions: Options = {
 export default function () {
   const seq = new Sequelize(DB_URI, sequelizeOptions);
   initTables(seq, pingTestInit, appInit, userInit);
-  return seq;
+  return seq.authenticate();
 }
 
 type InitFn = (sequelize: Sequelize) => void;
