@@ -57,7 +57,3 @@ export function userInit(sequelize: Sequelize) {
     tableName,
   });
 }
-
-export function relateUser() {
-  User.belongsTo(AppModel);
-}
