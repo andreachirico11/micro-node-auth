@@ -3,10 +3,8 @@ import { log_error, log_info } from '../utils/log';
 import { ServerErrorResp, SuccessResponse } from '../types/ApiResponses';
 import { INTERNAL_SERVER } from '../types/ErrorCodes';
 import { IUser, UserModel } from '../models/User';
-import { RequestWithAppId } from './apps';
+import { AddUserReq } from '../models/RequestTypes';
 
-
-type AddUserReq = RequestWithAppId & Request<{appId: string}, {}, IUser>;
 
 export const addUser: RequestHandler = async ({ params: {appId}, body }: AddUserReq, res) => {
   try {

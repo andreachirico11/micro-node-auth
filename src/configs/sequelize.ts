@@ -1,5 +1,5 @@
 import { Options, Sequelize } from 'sequelize';
-import { DB_URI, PRODUCTION } from '../utils/Envs';
+import { DB_URI, PRODUCTION } from './Envs';
 import { pingTestInit } from '../models/PingTest';
 import { appInit } from '../models/App';
 import { userInit } from '../models/User';

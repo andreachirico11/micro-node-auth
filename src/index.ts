@@ -1,5 +1,5 @@
 
-import { PORT } from './utils/Envs';
+import { PORT } from './configs/Envs';
 import { log_error, log_fatal, log_info } from './utils/log';
 import initSequelize from './configs/sequelize';
 import express from './configs/express';

@@ -6,7 +6,6 @@ import {
   ModelAttributes,
   Sequelize,
 } from 'sequelize';
-import { UserModel } from './User';
 
 const tableName = 'Apps';
 
@@ -25,12 +24,37 @@ const attributes: ModelAttributes = {
     type: DataTypes.DATE,
     allowNull: false,
   },
+  passwordLenght: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  uppercaseLetters: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  symbols: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  numbers: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
+  symbolsRegex: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 };
 
 export interface IApp {
   _id?: number;
   name: string;
   dateAdd: Date;
+  passwordLenght: number;
+  uppercaseLetters: boolean;
+  symbols: boolean;
+  numbers: boolean;
+  symbolsRegex?: string;
 }
 
 export class AppModel
@@ -40,6 +64,11 @@ export class AppModel
   declare _id: number;
   declare name: string;
   declare dateAdd: Date;
+  declare passwordLenght: number;
+  declare uppercaseLetters: boolean;
+  declare symbols: boolean;
+  declare numbers: boolean;
+  declare symbolsRegex?: string;
 }
 
 export function appInit(sequelize: Sequelize) {

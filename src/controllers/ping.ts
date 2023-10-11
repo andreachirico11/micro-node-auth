@@ -6,7 +6,7 @@ import { GENERIC } from '../types/ErrorCodes';
 
 export const getPing: RequestHandler = (req, res) => {
   console.log('Fetching from PingTest table');
-  PingTest.findOne({ attributes: ['asdfas'] })
+  PingTest.findOne({ attributes: ['name'] })
     .then(({name}) => {
       const logPhrase = 'Fetched the test with name: ' + name;
       log_info(logPhrase, "Success!!!");

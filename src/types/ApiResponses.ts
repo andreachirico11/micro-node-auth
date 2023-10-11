@@ -13,8 +13,8 @@ export class SuccessResponse {
 }
 
 abstract class ErrorResponse {
-    constructor(res: Response, status: number, errCode: ErrorCodes) {
-        sender(res, status, {success: false, errCode});
+    constructor(res: Response, status: number, errCode: ErrorCodes, errors: string[] = null) {
+        sender(res, status, {success: false, errCode, ...errors && {errors}});
     }
 }
 
@@ -31,7 +31,7 @@ export class NotFoundResp extends ErrorResponse {
 }
 
 export class ValidationErrResp extends ErrorResponse {
-    constructor(res: Response) {
-        super(res, 422, VALIDATION);
+    constructor(res: Response, errors: string[] = null) {
+        super(res, 422, VALIDATION, errors);
     }
 }

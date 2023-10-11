@@ -1,4 +1,4 @@
-import { BASE_URL } from '../utils/Envs';
+import { BASE_URL } from './Envs';
 import * as express from 'express';
 import router from './routes';
 

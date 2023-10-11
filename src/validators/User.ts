@@ -1,7 +1,4 @@
-import { object, number, string, date, array } from 'yup';
-
-// TODO date validation
-// TODO password validator
+import { object, number, string, date } from 'yup';
 
 export const userValidator = object({
   _id: number().optional(),

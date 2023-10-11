@@ -8,9 +8,8 @@ import {
   ValidationErrResp,
 } from '../types/ApiResponses';
 import { INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
-import { UserModel } from '../models/User';
-
-type AddAppReq = Request<{}, {}, IApp>;
+import { AddAppReq, RequestWithAppId } from '../models/RequestTypes';
+import { GetSetAppInRequest } from '../utils/GetSetAppInRequest';
 
 export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   try {
@@ -24,14 +23,11 @@ export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   }
 };
 
-export type RequestWithAppId = Request<{ appId: string }, {}, any>;
-
-export const checkIfAppExists: RequestHandler = async (
-  { params: { appId } }: RequestWithAppId,
-  res,
-  next
-) => {
+export const checkIfAppExists: RequestHandler = async (req: RequestWithAppId, res, next) => {
   try {
+    const {
+      params: { appId },
+    } = req;
     const _id = parseInt(appId);
     if (isNaN(_id)) {
       log_error('Error checking the app\n id param is not a valid number');
@@ -39,14 +35,15 @@ export const checkIfAppExists: RequestHandler = async (
     }
 
     log_info(`Check if App with id: ${appId} exists`);
-    const appExists = (await AppModel.count({ where: { _id } })) === 1;
+    const existentApp = await AppModel.findOne({ where: { _id } });
     log_info('Success');
 
-    if (!appExists) {
-      log_error('App doesn\'t exists');
+    if (!!!existentApp) {
+      log_error("App doesn't exists");
       return new NotFoundResp(res, NON_EXISTENT);
     }
 
+    GetSetAppInRequest.setApp(req, existentApp);
     next();
   } catch (e) {
     log_error(e, 'Error checking');
