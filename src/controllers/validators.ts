@@ -5,7 +5,7 @@ import { ValidationErrResp } from '../types/ApiResponses';
 import { AddUserReq } from '../models/RequestTypes';
 import { GetSetAppInRequest } from '../utils/GetSetAppInRequest';
 import generatePasswordSchema from '../validators/Password';
-import { DEFAULT_REGEX } from '../configs/Envs';
+import { SYMBOLS_REGEX } from '../configs/Envs';
 
 export const getRequestBodyValidator = (schema: ObjectSchema<any>) => {
   return function ({ body }, res, next) {
@@ -42,7 +42,7 @@ export const checkAppPasswordRequirements: RequestHandler = async (req: AddUserR
       numbers,
       symbols,
       uppercaseLetters,
-      symbolsRegex || DEFAULT_REGEX
+      SYMBOLS_REGEX
     ).validateSync(password);
     log_info('Password is valid');
     

@@ -3,20 +3,36 @@ import * as dotenvParseVariables from 'dotenv-parse-variables';
 import IEnvs from '../types/IEnvs';
 import { log_info } from '../utils/log';
 
-const aes56ctr = 'aes-256-ctr';
-export const CRYPT_ALGORITHMS = {aes56ctr};
+const defaultEnvs: IEnvs = {
+  PORT: 1234,
+  PRODUCTION: false,
+  BASE_URL: '',
+  DB_URI: '',
+  SYMBOLS_REGEX: '[!@#$%&*(\\)_+=|<>?\\[\\]{}]',
+};
 
-
-export declare const DEFAULT_REGEX = '[!@#$%&*(\\)_+=|<>?\\[\\]{}]';
-export declare const DEFAULT_CRYPT_ALGORITHM = 'aes-256-ctr';
-
-let parsedEnvs: IEnvs;
-if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
-  const { error, parsed } = config({});
-  if (!error) {
-    parsedEnvs = dotenvParseVariables(parsed) as IEnvs;
-    log_info(parsedEnvs, '--------- Actual Environments -------');
-  }
+let { error, parsed: preParsingVars } = config({});
+if (error) {
+  log_info(error, '.env file not found, using process envs');
+  preParsingVars = process.env;
 }
+const parsedEnvs = dotenvParseVariables(preParsingVars) as IEnvs;
 
-export const { DB_URI, PRODUCTION, PORT, BASE_URL } = parsedEnvs || process.env;
+export const {
+  PORT = defaultEnvs.PORT,
+  PRODUCTION = defaultEnvs.PRODUCTION,
+  BASE_URL = defaultEnvs.BASE_URL,
+  DB_URI = defaultEnvs.DB_URI,
+  SYMBOLS_REGEX = defaultEnvs.SYMBOLS_REGEX,
+} = parsedEnvs;
+
+log_info(
+  {
+    PORT,
+    PRODUCTION,
+    BASE_URL,
+    DB_URI,
+    SYMBOLS_REGEX,
+  },
+  '--------- Actual Environments -------'
+);
