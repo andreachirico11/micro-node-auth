@@ -5,6 +5,7 @@ export default interface IEnvs extends ParsedVariables {
     DB_URI: string;
     PORT: number;
     BASE_URL: string;
-    SYMBOLS_REGEX: string
+    SYMBOLS_REGEX: string;
+    MICRO_HASH_URI: string;
   }
   

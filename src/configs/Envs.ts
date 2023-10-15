@@ -9,6 +9,7 @@ const defaultEnvs: IEnvs = {
   BASE_URL: '',
   DB_URI: '',
   SYMBOLS_REGEX: '[!@#$%&*(\\)_+=|<>?\\[\\]{}]',
+  MICRO_HASH_URI: ''
 };
 
 let { error, parsed: preParsingVars } = config({});
@@ -24,6 +25,7 @@ export const {
   BASE_URL = defaultEnvs.BASE_URL,
   DB_URI = defaultEnvs.DB_URI,
   SYMBOLS_REGEX = defaultEnvs.SYMBOLS_REGEX,
+  MICRO_HASH_URI = defaultEnvs.MICRO_HASH_URI
 } = parsedEnvs;
 
 log_info(
@@ -33,6 +35,7 @@ log_info(
     BASE_URL,
     DB_URI,
     SYMBOLS_REGEX,
+    MICRO_HASH_URI
   },
   '--------- Actual Environments -------'
 );
