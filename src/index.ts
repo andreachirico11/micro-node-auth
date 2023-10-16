@@ -23,11 +23,13 @@ import { HashHelper } from './configs/HashHelper';
     log_error(e, 'Error with Database Connection');
   }
 
+  
   try {
     if (await HashHelper.ping()) {
       log_info('Connected to Micro Hash');
-      return;
-    } throw new Error();
+    } else {
+      throw new Error();
+    }
   } catch (e) {
     log_error(e, 'Error Calling Micro Hash');
   }

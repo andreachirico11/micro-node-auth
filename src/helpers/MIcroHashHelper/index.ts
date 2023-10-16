@@ -1,3 +1,3 @@
-export * from "./MicroAuthHelper";
+export * from "./MicroHashHelper";
 export * from "./models";
 
