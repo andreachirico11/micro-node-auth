@@ -1,9 +1,10 @@
 
-import { MICRO_HASH_URI, PORT } from './configs/Envs';
+import { PORT } from './configs/Envs';
 import { log_error, log_fatal, log_info } from './utils/log';
 import initSequelize from './configs/sequelize';
 import express from './configs/express';
 import { Application } from 'express';
+import { HashHelper } from './configs/HashHelper';
 
 (async function () {
 
@@ -23,11 +24,12 @@ import { Application } from 'express';
   }
 
   try {
-    const {ok} = await fetch(MICRO_HASH_URI + "/ping");
-    if (!ok) throw new Error();
-    log_info('Connected to Micro Hash');
+    if (await HashHelper.ping()) {
+      log_info('Connected to Micro Hash');
+      return;
+    } throw new Error();
   } catch (e) {
-    log_error(e, 'Error with Database Connection');
+    log_error(e, 'Error Calling Micro Hash');
   }
 
   app.listen(PORT, () => {

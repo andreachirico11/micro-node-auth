@@ -1,3 +1,4 @@
+import { Response } from "node-fetch";
 import { IApp } from "./App";
 import { IUser } from "./User";
 import { Request } from 'express';
