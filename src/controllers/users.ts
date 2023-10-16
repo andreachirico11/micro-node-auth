@@ -34,3 +34,6 @@ export const addUser: RequestHandler = async ({ params: { appId }, body }: AddUs
     return new ServerErrorResp(res, INTERNAL_SERVER);
   }
 };
+
+
+export const authenticateUser: RequestHandler = async ({ params: { appId }, body }: AddUserReq, res) => {}

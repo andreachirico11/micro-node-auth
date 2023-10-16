@@ -4,7 +4,7 @@ import { log_error, log_info } from '../utils/log';
 import { ValidationErrResp } from '../types/ApiResponses';
 import { AddUserReq } from '../models/RequestTypes';
 import { GetSetAppInRequest } from '../utils/GetSetAppInRequest';
-import generatePasswordSchema from '../validators/Password';
+import generatePasswordSchema from '../utils/validators/Password';
 import { SYMBOLS_REGEX } from '../configs/Envs';
 
 export const getRequestBodyValidator = (schema: ObjectSchema<any>) => {

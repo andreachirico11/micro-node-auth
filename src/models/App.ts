@@ -44,6 +44,10 @@ const attributes: ModelAttributes = {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  refreshTokenTimeout: {
+    type: DataTypes.NUMBER,
+    allowNull: false,
+  },
 };
 
 export interface IApp {
@@ -55,6 +59,7 @@ export interface IApp {
   symbols: boolean;
   numbers: boolean;
   symbolsRegex?: string;
+  refreshTokenTimeout: number;
 }
 
 export class AppModel
@@ -69,6 +74,7 @@ export class AppModel
   declare symbols: boolean;
   declare numbers: boolean;
   declare symbolsRegex?: string;
+  declare refreshTokenTimeout: number;
 }
 
 export function appInit(sequelize: Sequelize) {

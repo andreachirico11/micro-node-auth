@@ -14,19 +14,19 @@ const attributes: ModelAttributes = {
     type: DataTypes.INTEGER,
     primaryKey: true,
     allowNull: false,
-    autoIncrement: true
+    autoIncrement: true,
   },
   name: {
     type: DataTypes.STRING(100),
-    allowNull: false
+    allowNull: false,
   },
   dateAdd: {
     type: DataTypes.DATE,
-    allowNull: false
+    allowNull: false,
   },
   password: {
     type: DataTypes.CHAR(60),
-    allowNull: false
+    allowNull: false,
   },
   datePasswordChange: {
     type: DataTypes.DATE,
@@ -40,6 +40,12 @@ const attributes: ModelAttributes = {
   app_id: {
     type: DataTypes.INTEGER,
   },
+  refreshToken: {
+    type: DataTypes.STRING(100),
+  },
+  dateRefTokenExp: {
+    type: DataTypes.DATE,
+  },
 };
 
 export interface IUser {
@@ -51,9 +57,14 @@ export interface IUser {
   dateTokenExp?: Date;
   resetToken?: string;
   app_id?: number;
+  refreshToken: string;
+  dateRefTokenExp: Date;
 }
 
-export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>> implements IUser {
+export class UserModel
+  extends Model<InferAttributes<UserModel>, InferCreationAttributes<UserModel>>
+  implements IUser
+{
   declare _id: number;
   declare name: string;
   declare dateAdd: Date;
@@ -62,8 +73,9 @@ export class UserModel extends Model<InferAttributes<UserModel>, InferCreationAt
   declare dateTokenExp?: Date;
   declare resetToken?: string;
   declare app_id?: number;
+  declare refreshToken: string;
+  declare dateRefTokenExp: Date;
 }
-
 
 export function userInit(sequelize: Sequelize) {
   UserModel.init(attributes, {

@@ -9,4 +9,6 @@ export const userValidator = object({
   resetToken: string().optional(),
   dateTokenExp: date().optional(),
   app_id: number().optional(),
+  refreshToken: string().optional(),
+  dateRefTokenExp: date().optional(),
 }).required();

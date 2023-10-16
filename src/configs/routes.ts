@@ -3,8 +3,8 @@ import { Router } from 'express';
 import { unsupportedUrl } from '../controllers/unsuportedUrl';
 import { addApp, checkIfAppExists } from '../controllers/apps';
 import { checkAppPasswordRequirements, getRequestBodyValidator } from '../controllers/validators';
-import { appValidator } from '../validators/App';
-import { userValidator } from '../validators/User';
+import { appValidator } from '../utils/validators/App';
+import { userValidator } from '../utils/validators/User';
 import { addUser } from '../controllers/users';
 
 const router = Router();
