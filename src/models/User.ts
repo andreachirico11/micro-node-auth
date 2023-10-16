@@ -31,7 +31,7 @@ const attributes: ModelAttributes = {
   datePasswordChange: {
     type: DataTypes.DATE,
   },
-  resetToken: {
+  authToken: {
     type: DataTypes.STRING(100),
   },
   dateTokenExp: {
@@ -46,6 +46,12 @@ const attributes: ModelAttributes = {
   dateRefTokenExp: {
     type: DataTypes.DATE,
   },
+  dateResetTokenExp: {
+    type: DataTypes.DATE,
+  },
+  resetToken: {
+    type: DataTypes.STRING(100),
+  },
 };
 
 export interface IUser {
@@ -54,11 +60,19 @@ export interface IUser {
   dateAdd: Date;
   password: string;
   datePasswordChange?: Date;
+  authToken?: string;
   dateTokenExp?: Date;
-  resetToken?: string;
   app_id?: number;
   refreshToken: string;
   dateRefTokenExp: Date;
+  resetToken?: string;
+  dateResetTokenExp?: Date;
+}
+
+export interface IAuthUser {
+  username: string;
+  password: string;
+  appId: number;
 }
 
 export class UserModel
@@ -70,11 +84,13 @@ export class UserModel
   declare dateAdd: Date;
   declare password: string;
   declare datePasswordChange?: Date;
+  declare authToken?: string;
   declare dateTokenExp?: Date;
-  declare resetToken?: string;
   declare app_id?: number;
   declare refreshToken: string;
   declare dateRefTokenExp: Date;
+  declare resetToken?: string;
+  declare dateResetTokenExp?: Date;
 }
 
 export function userInit(sequelize: Sequelize) {

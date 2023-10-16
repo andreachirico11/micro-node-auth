@@ -3,7 +3,7 @@ import { ObjectSchema, ValidationError } from 'yup';
 import { log_error, log_info } from '../utils/log';
 import { ValidationErrResp } from '../types/ApiResponses';
 import { AddUserReq } from '../models/RequestTypes';
-import { GetSetAppInRequest } from '../utils/GetSetAppInRequest';
+import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import generatePasswordSchema from '../utils/validators/Password';
 import { SYMBOLS_REGEX } from '../configs/Envs';
 
@@ -29,7 +29,7 @@ export const checkAppPasswordRequirements: RequestHandler = async (req: AddUserR
     const {
       body: { password },
     } = req;
-    const foundApp = GetSetAppInRequest.getApp(req);
+    const foundApp = GetSetRequestProps.getApp(req);
     const { _id, numbers, passwordLenght, symbols, uppercaseLetters, symbolsRegex } = foundApp;
 
     log_info(

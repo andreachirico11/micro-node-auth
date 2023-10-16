@@ -6,9 +6,16 @@ export const userValidator = object({
   dateAdd: date().required(),
   password: string().required(),
   datePasswordChange: date().optional(),
-  resetToken: string().optional(),
+  authToken: string().optional(),
   dateTokenExp: date().optional(),
   app_id: number().optional(),
   refreshToken: string().optional(),
   dateRefTokenExp: date().optional(),
+  resetToken: string().optional(),
+  dateResetTokenExp: date().optional(),
+}).required();
+
+export const userAuth = object({
+  username: string().required(),
+  password: string().required(),
 }).required();

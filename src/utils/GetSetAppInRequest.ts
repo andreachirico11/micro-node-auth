@@ -1,14 +1,23 @@
 import { Request } from 'express';
 import { AppModel } from '../models/App';
+import { UserModel } from '../models/User';
 
-const PROP_NAME = "foundApp";
+const APP = "foundApp", USER = "foundUser";
 
-export class GetSetAppInRequest {
+export class GetSetRequestProps {
     static getApp(req: Request) {
-        return req[PROP_NAME] as  AppModel;
+        return req[APP] as  AppModel;
     }
 
     static setApp(req: Request, app: AppModel) {
-        req[PROP_NAME] = app;
+        req[APP] = app;
+    }
+
+    static getUser(req: Request) {
+        return req[USER] as  UserModel;
+    }
+
+    static setUser(req: Request, u: UserModel) {
+        req[USER] = u;
     }
 }

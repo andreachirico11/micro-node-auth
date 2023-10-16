@@ -9,7 +9,7 @@ import {
 } from '../types/ApiResponses';
 import { INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
 import { AddAppReq, RequestWithAppId } from '../models/RequestTypes';
-import { GetSetAppInRequest } from '../utils/GetSetAppInRequest';
+import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 
 export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   try {
@@ -43,7 +43,7 @@ export const checkIfAppExists: RequestHandler = async (req: RequestWithAppId, re
       return new NotFoundResp(res, NON_EXISTENT);
     }
 
-    GetSetAppInRequest.setApp(req, existentApp);
+    GetSetRequestProps.setApp(req, existentApp);
     next();
   } catch (e) {
     log_error(e, 'Error checking');

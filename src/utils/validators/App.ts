@@ -10,5 +10,5 @@ export const appValidator = object({
   uppercaseLetters: boolean().required(),
   symbols: boolean().required(),
   numbers: boolean().required(),
-  refreshTokenTimeout: number().required(),
+  tokenHoursValidity: number().required(),
 }).required();

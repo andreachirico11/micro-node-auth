@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { ErrorCodes, VALIDATION } from './ErrorCodes';
+import { ErrorCodes, UNAUTHORIZED, VALIDATION } from './ErrorCodes';
 
 const sender = (res: Response, status, json: any) => res.status(status).json(json);
 
@@ -11,6 +11,12 @@ export class SuccessResponse {
     sender(res, 200, {success: true, ...payload && {payload}});
   }
 }
+
+export class SuccessResponseWithTokens {
+    constructor(res: Response, payload: {authToken: string, refreshToken: string, dateTokenExp: Date}) {
+      sender(res, 200, {success: true, payload});
+    }
+  }
 
 abstract class ErrorResponse {
     constructor(res: Response, status: number, errCode: ErrorCodes, errors: string[] = null) {
@@ -33,5 +39,12 @@ export class NotFoundResp extends ErrorResponse {
 export class ValidationErrResp extends ErrorResponse {
     constructor(res: Response, errors: string[] = null) {
         super(res, 422, VALIDATION, errors);
+    }
+}
+
+
+export class UnauthorizedResp extends ErrorResponse {
+    constructor(res: Response) {
+        super(res, 401, UNAUTHORIZED, ["Password doesn't match"]);
     }
 }
