@@ -3,19 +3,19 @@ import { Router } from 'express';
 import { unsupportedUrl } from '../controllers/unsuportedUrl';
 import { addApp, checkIfAppExists } from '../controllers/apps';
 import { checkAppPasswordRequirements, getRequestBodyValidator } from '../controllers/validators';
-import { appValidator } from '../utils/validators/App';
-import { userAuth, userValidator } from '../utils/validators/User';
-import { addUser, authenticateUser, getUserByName, getUserToken, updateUserTokens } from '../controllers/users';
+import { appCreation } from '../utils/validators/App';
+import { userAuth, userCreation } from '../utils/validators/User';
+import { addUser, authenticateUser, getUserByNameAndApp, getUserToken, updateUserTokens } from '../controllers/users';
 
 const router = Router();
 
-router.post('/app', getRequestBodyValidator(appValidator), addApp);
+router.post('/app', getRequestBodyValidator(appCreation), addApp);
 
 router.post(
   '/user/:appId/auth',
   getRequestBodyValidator(userAuth),
   checkIfAppExists,
-  getUserByName,
+  getUserByNameAndApp,
   authenticateUser,
   updateUserTokens,
   getUserToken
@@ -23,7 +23,7 @@ router.post(
 
 router.post(
   '/user/:appId',
-  getRequestBodyValidator(userValidator),
+  getRequestBodyValidator(userCreation),
   checkIfAppExists,
   checkAppPasswordRequirements,
   addUser

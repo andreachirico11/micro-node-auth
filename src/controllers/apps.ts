@@ -14,7 +14,7 @@ import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   try {
     log_info(body, 'Creating new app with data: ');
-    await AppModel.create(body);
+    await AppModel.create({...body, dateAdd: new Date()});
     log_info('Success');
     return new SuccessResponse(res);
   } catch (e) {

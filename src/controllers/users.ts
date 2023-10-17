@@ -38,6 +38,8 @@ export const addUser: RequestHandler = async ({ params: { appId }, body }: AddUs
       ...otherProps,
       app_id,
       password: hashedPsw,
+      dateAdd: new Date(),
+      datePasswordChange: new Date()
     });
     log_info('User created with id: ' + user_id);
 
@@ -47,11 +49,6 @@ export const addUser: RequestHandler = async ({ params: { appId }, body }: AddUs
     return new ServerErrorResp(res, INTERNAL_SERVER);
   }
 };
-
-// check user existence in app
-// add user password change = creation
-// data di creazione = ora
-// anche app
 
 export const authenticateUser: RequestHandler = async (req: AuthenticateUserReq, res, next) => {
   try {
@@ -81,13 +78,14 @@ export const authenticateUser: RequestHandler = async (req: AuthenticateUserReq,
   }
 };
 
-export const getUserByName: RequestHandler = async (req: ReqWithUsername, res, next) => {
+export const getUserByNameAndApp: RequestHandler = async (req: ReqWithUsername, res, next) => {
   try {
     const {
       body: { username },
     } = req;
     log_info(`Getting User ` + username);
-    const foundUser = await UserModel.findOne({ where: { name: username } });
+    const {_id} = GetSetRequestProps.getApp(req);
+    const foundUser = await UserModel.findOne({ where: { name: username, app_id:  _id} });
     log_info('Success');
 
     if (!!!foundUser) {
