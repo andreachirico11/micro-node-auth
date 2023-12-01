@@ -4,14 +4,15 @@ import { log_error, log_info } from '../utils/log';
 import { ServerErrorResp, SeviceUnavailable, SuccessResponse } from '../types/ApiResponses';
 import { GENERIC, NO_RESPONSE } from '../types/ErrorCodes';
 import { HashHelper } from '../configs/HashHelper';
+import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 
 export const getPing: RequestHandler = async (req, res) => {
   try {
     log_info('Start Ping Test From Db');
     const { name } = await PingTest.findOne({ attributes: ['name'] });
-    const logPhrase = 'Fetched the test with name: ' + name;
-    log_info(logPhrase, 'Success!!!');
-    return new SuccessResponse(res, logPhrase);
+    const message = 'Fetched the test with name: ' + name;
+    log_info(message, 'Success!!!');
+    return new SuccessResponse(res, {message, host: GetSetRequestProps.getClientIp(req)});
   } catch (error) {
     log_error(error, 'There was an error fetching tests');
     return new ServerErrorResp(res, GENERIC);

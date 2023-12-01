@@ -6,8 +6,11 @@ import { checkAppPasswordRequirements, getRequestBodyValidator } from '../contro
 import { appCreation } from '../utils/validators/App';
 import { userAuth, userCreation } from '../utils/validators/User';
 import { addUser, authenticateUser, getUserByNameAndApp, getUserToken, updateUserTokens } from '../controllers/users';
+import { configRequest } from '../controllers/utils';
 
 const router = Router();
+
+router.all("*", configRequest)
 
 router.post('/app', getRequestBodyValidator(appCreation), addApp);
 

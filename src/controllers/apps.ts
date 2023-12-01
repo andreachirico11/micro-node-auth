@@ -1,6 +1,6 @@
-import { Request, RequestHandler } from 'express';
+import { RequestHandler } from 'express';
 import { log_error, log_info } from '../utils/log';
-import { AppModel, IApp } from '../models/App';
+import { AppModel } from '../models/App';
 import {
   NotFoundResp,
   ServerErrorResp,
