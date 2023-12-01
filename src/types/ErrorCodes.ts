@@ -4,6 +4,7 @@ export const VALIDATION = 'MNA_3';
 export const INTERNAL_SERVER = 'MNA_4';
 export const NON_EXISTENT = 'MNA_5';
 export const UNAUTHORIZED = 'MNA_6';
+export const NO_RESPONSE = 'MNA_7';
 
 
 export type ErrorCodes =
@@ -12,4 +13,5 @@ export type ErrorCodes =
   | typeof VALIDATION
   | typeof INTERNAL_SERVER
   | typeof UNAUTHORIZED
+  | typeof NO_RESPONSE
   | typeof NON_EXISTENT;

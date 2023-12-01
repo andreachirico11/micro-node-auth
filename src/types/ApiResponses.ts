@@ -30,6 +30,12 @@ export class ServerErrorResp extends ErrorResponse {
     }
 }
 
+export class SeviceUnavailable extends ErrorResponse {
+    constructor(res: Response, errCode: ErrorCodes) {
+        super(res, 503, errCode);
+    }
+}
+
 export class NotFoundResp extends ErrorResponse {
     constructor(res: Response, errCode: ErrorCodes) {
         super(res, 404, errCode);

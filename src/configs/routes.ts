@@ -1,4 +1,4 @@
-import { getPing } from '../controllers/ping';
+import { getPing, pingExternalSevices } from '../controllers/ping';
 import { Router } from 'express';
 import { unsupportedUrl } from '../controllers/unsuportedUrl';
 import { addApp, checkIfAppExists } from '../controllers/apps';
@@ -29,7 +29,7 @@ router.post(
   addUser
 );
 
-
+router.get('/ping/ext', pingExternalSevices);
 router.get('/ping', getPing);
 
 router.use('*', unsupportedUrl);
