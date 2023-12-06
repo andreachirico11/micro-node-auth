@@ -14,6 +14,7 @@ import { HashHelper } from '../configs/HashHelper';
 import { isHashErrorResponse } from '../helpers/MIcroHashHelper';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { getActualDateWithAddedHours } from '../utils/dates';
+import { NodeTlsHandler } from '../configs/Envs';
 
 const callMicroHash = async (stringToHash: string) => {
   const hashResp = await HashHelper.hashString(stringToHash);
@@ -29,9 +30,12 @@ export const addUser: RequestHandler = async ({ params: { appId }, body }: AddUs
 
     const { password, ...otherProps } = body;
 
+    NodeTlsHandler.disableTls();
     log_info('Call micro-node-crypt hashing service');
     const hashedPsw = await callMicroHash(password);
     log_info('Password hashed successfully');
+    NodeTlsHandler.enableTls();
+
 
     log_info(otherProps, 'Creating new user with data: ');
     const { _id: user_id } = await UserModel.create({
@@ -59,7 +63,9 @@ export const authenticateUser: RequestHandler = async (req: AuthenticateUserReq,
       `Starting authentication process for username < ${username} > to application < ${app.name} >`
     );
 
+    NodeTlsHandler.disableTls();
     const comparisonResult = await HashHelper.compareString(user.password, password);
+    NodeTlsHandler.enableTls();
 
     if (isHashErrorResponse(comparisonResult)) {
       throw new Error('Micro Hash Helper: ' + comparisonResult.errors[0]);

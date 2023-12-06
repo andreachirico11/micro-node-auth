@@ -19,6 +19,22 @@ if (error) {
 }
 const parsedEnvs = dotenvParseVariables(preParsingVars) as IEnvs;
 
+export class NodeTlsHandler {
+  static disableTls() {
+  log_info('Disabling tls');
+    this.tls = false;
+  }
+
+  static enableTls() {
+    log_info('Enabling tls');
+    this.tls = true;
+  }
+
+  private static set tls(value: boolean) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = value ? "1" : "0";
+  }
+}
+
 export const {
   PORT = defaultEnvs.PORT,
   PRODUCTION = defaultEnvs.PRODUCTION,
