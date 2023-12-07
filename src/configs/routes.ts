@@ -1,7 +1,7 @@
 import { getPing, pingExternalSevices } from '../controllers/ping';
 import { Router } from 'express';
 import { unsupportedUrl } from '../controllers/unsuportedUrl';
-import { addApp, checkIfAppExists } from '../controllers/apps';
+import { addApp, checkIfAppExistsFromBody, checkIfAppExistsFromParams } from '../controllers/apps';
 import { checkAppPasswordRequirements, getRequestBodyValidator } from '../controllers/validators';
 import { appCreation } from '../utils/validators/App';
 import { userAuth, userCreation } from '../utils/validators/User';
@@ -15,9 +15,9 @@ router.all("*", configRequest)
 router.post('/app', getRequestBodyValidator(appCreation), addApp);
 
 router.post(
-  '/user/:appId/auth',
+  '/auth',
   getRequestBodyValidator(userAuth),
-  checkIfAppExists,
+  checkIfAppExistsFromBody,
   getUserByNameAndApp,
   authenticateUser,
   updateUserTokens,
@@ -27,7 +27,7 @@ router.post(
 router.post(
   '/user/:appId',
   getRequestBodyValidator(userCreation),
-  checkIfAppExists,
+  checkIfAppExistsFromParams,
   checkAppPasswordRequirements,
   addUser
 );

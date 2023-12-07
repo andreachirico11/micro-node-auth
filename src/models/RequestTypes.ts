@@ -1,4 +1,4 @@
-import { IApp } from "./App";
+import { IApp, IAppId } from "./App";
 import { IAuthUser, IUser } from "./User";
 import { Request } from 'express';
 
@@ -8,11 +8,8 @@ export type AddAppReq = Request<{}, {}, IApp>;
 
 export type AddUserReq = Request<AppIdParams, {}, IUser>;
 
-export type AuthenticateUserReq = Request<AppIdParams, {}, {
-    username: string;
-    password: string;
-  }>;
+export type AuthRequest = Request<any, {}, IAuthUser>;
 
-export type ReqWithUsername = Request<any, {}, IAuthUser>;
+export type RequestWithAppIdInParams = Request<AppIdParams, {}, any>;
 
-export type RequestWithAppId = Request<AppIdParams, {}, any>;
+export type RequestWithAppIdInBody = Request<any, {}, IAppId>;

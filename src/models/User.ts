@@ -6,6 +6,7 @@ import {
   ModelAttributes,
   Sequelize,
 } from 'sequelize';
+import { IAppId } from './App';
 
 const tableName = 'Users';
 
@@ -69,10 +70,9 @@ export interface IUser {
   dateResetTokenExp?: Date;
 }
 
-export interface IAuthUser {
+export interface IAuthUser extends IAppId {
   username: string;
   password: string;
-  appId: number;
 }
 
 export class UserModel

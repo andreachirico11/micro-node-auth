@@ -9,7 +9,7 @@ import {
 } from '../types/ApiResponses';
 import { INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
 import { UserModel } from '../models/User';
-import { AddUserReq, AuthenticateUserReq, ReqWithUsername } from '../models/RequestTypes';
+import { AddUserReq, AuthRequest } from '../models/RequestTypes';
 import { HashHelper } from '../configs/HashHelper';
 import { isHashErrorResponse } from '../helpers/MIcroHashHelper';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
@@ -34,8 +34,6 @@ export const addUser: RequestHandler = async ({ params: { appId }, body }: AddUs
     log_info('Call micro-node-crypt hashing service');
     const hashedPsw = await callMicroHash(password);
     log_info('Password hashed successfully');
-    NodeTlsHandler.enableTls();
-
 
     log_info(otherProps, 'Creating new user with data: ');
     const { _id: user_id } = await UserModel.create({
@@ -51,10 +49,12 @@ export const addUser: RequestHandler = async ({ params: { appId }, body }: AddUs
   } catch (e) {
     log_error(e, 'Error creating new user');
     return new ServerErrorResp(res, INTERNAL_SERVER);
+  } finally {
+    NodeTlsHandler.enableTls();
   }
 };
 
-export const authenticateUser: RequestHandler = async (req: AuthenticateUserReq, res, next) => {
+export const authenticateUser: RequestHandler = async (req: AuthRequest, res, next) => {
   try {
     const app = GetSetRequestProps.getApp(req),
       user = GetSetRequestProps.getUser(req),
@@ -65,7 +65,6 @@ export const authenticateUser: RequestHandler = async (req: AuthenticateUserReq,
 
     NodeTlsHandler.disableTls();
     const comparisonResult = await HashHelper.compareString(user.password, password);
-    NodeTlsHandler.enableTls();
 
     if (isHashErrorResponse(comparisonResult)) {
       throw new Error('Micro Hash Helper: ' + comparisonResult.errors[0]);
@@ -81,10 +80,12 @@ export const authenticateUser: RequestHandler = async (req: AuthenticateUserReq,
   } catch (e) {
     log_error(e, 'Authentication Error');
     return new ServerErrorResp(res, INTERNAL_SERVER);
+  } finally {
+    NodeTlsHandler.enableTls();
   }
 };
 
-export const getUserByNameAndApp: RequestHandler = async (req: ReqWithUsername, res, next) => {
+export const getUserByNameAndApp: RequestHandler = async (req: AuthRequest, res, next) => {
   try {
     const {
       body: { username },
@@ -131,7 +132,7 @@ export const updateUserTokens: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const getUserToken: RequestHandler = async (req: ReqWithUsername, res) => {
+export const getUserToken: RequestHandler = async (req: AuthRequest, res) => {
   try {
     const {name, authToken, dateTokenExp, refreshToken} = GetSetRequestProps.getUser(req);
     log_info(`Returning ${name} tokens`);
