@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { NextFunction, RequestHandler } from 'express';
 import { log_error, log_info } from '../utils/log';
 import { AppModel } from '../models/App';
 import {
@@ -8,8 +8,9 @@ import {
   ValidationErrResp,
 } from '../types/ApiResponses';
 import { INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
-import { AddAppReq, RequestWithAppId } from '../models/RequestTypes';
+import { AddAppReq, RequestWithAppIdInBody, RequestWithAppIdInParams } from '../models/RequestTypes';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
+import { Response } from 'express';
 
 export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   try {
@@ -23,25 +24,35 @@ export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   }
 };
 
-export const checkIfAppExists: RequestHandler = async (req: RequestWithAppId, res, next) => {
+export const checkIfAppExistsFromParams: RequestHandler = async (req: RequestWithAppIdInParams, res, next) => {
+  const {
+    params: { appId },
+  } = req;
+  return checkIfAppExist(parseInt(appId), req, res, next);
+};
+
+export const checkIfAppExistsFromBody: RequestHandler = async (req: RequestWithAppIdInBody, res, next) => {
+  let {
+    body: { appId },
+  } = req;
+  return checkIfAppExist(appId, req, res, next);
+};
+
+const checkIfAppExist = async (_id: number | string, req: RequestWithAppIdInBody | RequestWithAppIdInParams, res: Response, next: NextFunction) => {
   try {
-    const {
-      params: { appId },
-    } = req;
-    const _id = parseInt(appId);
+  if (typeof _id === 'string') _id = parseInt(_id);
     if (isNaN(_id)) {
-      log_error('Error checking the app\n id param is not a valid number');
+      log_error('The app id is not a valid number');
       return new ValidationErrResp(res);
     }
 
-    log_info(`Check if App with id: ${appId} exists`);
+    log_info(`Check if App with id: ${_id} exists`);
     const existentApp = await AppModel.findOne({ where: { _id } });
-    log_info('Success');
-
     if (!!!existentApp) {
       log_error("App doesn't exists");
       return new NotFoundResp(res, NON_EXISTENT);
     }
+    log_info('Success');
 
     GetSetRequestProps.setApp(req, existentApp);
     next();

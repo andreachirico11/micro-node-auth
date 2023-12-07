@@ -83,3 +83,8 @@ export function appInit(sequelize: Sequelize) {
     tableName,
   });
 }
+
+
+export interface IAppId {
+  appId: number;
+}
