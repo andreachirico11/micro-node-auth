@@ -7,7 +7,11 @@ export type AppIdParams = {appId: string};
 
 export type AdminIdParams = {adminId: string};
 
-export type AddAppReq = Request<{}, {}, IApp>;
+export interface RequestWithTokenHeader<TParams, Tbody, Tbody2> extends Request<TParams, Tbody, Tbody2> {
+    headers:  {admintoken: string}
+};
+
+export type AddAppReq = RequestWithTokenHeader<{}, {}, IApp>;
 
 export type AddUserReq = Request<AppIdParams, {}, IUser>;
 

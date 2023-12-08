@@ -14,29 +14,31 @@ import {
 } from '../controllers/users';
 import { configRequest } from '../controllers/utils';
 import { adminCreation } from '../utils/validators/Admin';
-import { addAdmin, areAdminActionsEnabled, deleteAdmin } from '../controllers/admins';
+import { addAdmin, areAdminActionsEnabled, authenticateAdmin, deleteAdmin, getAdminByName, getAdminToken, isAdminTokenValid, updateAdminToken } from '../controllers/admins';
 
 const router = Router();
 
 router.all('*', configRequest);
 
-router.post('/app', getRequestBodyValidator(appCreation), addApp);
+router.post('/app', isAdminTokenValid, getRequestBodyValidator(appCreation), addApp);
 
-router.post(
-  '/auth',
-  getRequestBodyValidator(userAuth),
+const authRouter = Router();
+
+authRouter.post('/admin', getAdminByName, authenticateAdmin, updateAdminToken, getAdminToken);
+authRouter.post(
+  '/',
   checkIfAppExistsFromBody,
   getUserByNameAndApp,
   authenticateUser,
   updateUserTokens,
   getUserToken
 );
+router.use('/auth', getRequestBodyValidator(userAuth), authRouter);
 
 const adminRouter = Router();
 adminRouter.delete('/:adminId', deleteAdmin);
 adminRouter.post('/', getRequestBodyValidator(adminCreation), addAdmin);
-router.use('/admin', areAdminActionsEnabled, adminRouter)
-
+router.use('/admin', areAdminActionsEnabled, adminRouter);
 
 router.post(
   '/user/:appId',
