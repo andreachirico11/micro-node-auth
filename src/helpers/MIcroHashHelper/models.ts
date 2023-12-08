@@ -17,6 +17,13 @@ export interface CompareBody {hash: string, compareWith: string};
       hashResult: string;
     };
   }
+
+  export interface ApiKeyResponse {
+    success: true;
+    payload: {
+      key: string;
+    };
+  }
   
   export interface HashCompareResponse {
     success: true;
@@ -24,13 +31,14 @@ export interface CompareBody {hash: string, compareWith: string};
       compareResult: boolean;
     };
   }
+
   export interface HashErrorResponse {
     errCode: ErrorCodes;
     errors: [string];
     success: false;
   }
   
-  export function isHashErrorResponse(r: HashResponse | HashErrorResponse | HashCompareResponse): r is HashErrorResponse {
+  export function isHashErrorResponse(r: HashResponse | HashErrorResponse | HashCompareResponse | ApiKeyResponse): r is HashErrorResponse {
       return !r.success;
   }
   

@@ -8,14 +8,27 @@ import {
   ValidationErrResp,
 } from '../types/ApiResponses';
 import { INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
-import { AddAppReq, RequestWithAppIdInBody, RequestWithAppIdInParams } from '../models/RequestTypes';
+import {
+  AddAppReq,
+  RequestWithAppIdInBody,
+  RequestWithAppIdInParams,
+} from '../models/RequestTypes';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { Response } from 'express';
+import { MicroHashHelper, isHashErrorResponse } from '../helpers/MIcroHashHelper';
+import { HashHelper } from '../configs/HashHelper';
 
 export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   try {
     log_info(body, 'Creating new app with data: ');
-    await AppModel.create({...body, dateAdd: new Date()});
+    log_info('Calling external service to get a new api key');
+    const keyResponse = await HashHelper.getNewApiKey();
+    if (isHashErrorResponse(keyResponse)) {
+      throw new Error("Micro Hash Helper can't provide a valid api key");
+    }
+    const {payload: {key: apiKey}} = keyResponse;
+    log_info('Key Generated: ' + apiKey);
+    await AppModel.create({ ...body, dateAdd: new Date(), apiKey});
     log_info('Success');
     return new SuccessResponse(res);
   } catch (e) {
@@ -24,23 +37,36 @@ export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   }
 };
 
-export const checkIfAppExistsFromParams: RequestHandler = async (req: RequestWithAppIdInParams, res, next) => {
+export const checkIfAppExistsFromParams: RequestHandler = async (
+  req: RequestWithAppIdInParams,
+  res,
+  next
+) => {
   const {
     params: { appId },
   } = req;
   return checkIfAppExist(parseInt(appId), req, res, next);
 };
 
-export const checkIfAppExistsFromBody: RequestHandler = async (req: RequestWithAppIdInBody, res, next) => {
+export const checkIfAppExistsFromBody: RequestHandler = async (
+  req: RequestWithAppIdInBody,
+  res,
+  next
+) => {
   let {
     body: { appId },
   } = req;
   return checkIfAppExist(appId, req, res, next);
 };
 
-const checkIfAppExist = async (_id: number | string, req: RequestWithAppIdInBody | RequestWithAppIdInParams, res: Response, next: NextFunction) => {
+const checkIfAppExist = async (
+  _id: number | string,
+  req: RequestWithAppIdInBody | RequestWithAppIdInParams,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-  if (typeof _id === 'string') _id = parseInt(_id);
+    if (typeof _id === 'string') _id = parseInt(_id);
     if (isNaN(_id)) {
       log_error('The app id is not a valid number');
       return new ValidationErrResp(res);

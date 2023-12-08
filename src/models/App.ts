@@ -4,7 +4,6 @@ import {
   InferCreationAttributes,
   Model,
   ModelAttributes,
-  Sequelize,
 } from 'sequelize';
 import { SequelizeModelInitFn } from '../types/SequelizeModelInitFn';
 
@@ -49,6 +48,9 @@ const attributes: ModelAttributes = {
     type: DataTypes.NUMBER,
     allowNull: false,
   },
+  apiKey: {
+    type: DataTypes.STRING(100),
+  },
 };
 
 export interface IApp {
@@ -60,7 +62,8 @@ export interface IApp {
   symbols: boolean;
   numbers: boolean;
   symbolsRegex?: string;
-  tokenHoursValidity: number;
+  tokenHoursValidity?: number;
+  apiKey?: string;
 }
 
 export class AppModel
@@ -75,16 +78,16 @@ export class AppModel
   declare symbols: boolean;
   declare numbers: boolean;
   declare symbolsRegex?: string;
-  declare tokenHoursValidity: number;
+  declare tokenHoursValidity?: number;
+  declare apiKey?: string;
 }
 
-export const appInit: SequelizeModelInitFn =  sequelize => {
+export const appInit: SequelizeModelInitFn = (sequelize) => {
   AppModel.init(attributes, {
     sequelize,
     tableName,
   });
-}
-
+};
 
 export interface IAppId {
   appId: number;
