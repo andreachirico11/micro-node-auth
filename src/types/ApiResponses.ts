@@ -50,7 +50,7 @@ export class ValidationErrResp extends ErrorResponse {
 
 
 export class UnauthorizedResp extends ErrorResponse {
-    constructor(res: Response) {
-        super(res, 401, UNAUTHORIZED, ["Password doesn't match"]);
+    constructor(res: Response, customMessage = "Password doesn't match") {
+        super(res, 401, UNAUTHORIZED, [customMessage]);
     }
 }

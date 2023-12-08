@@ -1,8 +1,6 @@
 import { Options, Sequelize } from 'sequelize';
 import { DB_URI, PRODUCTION } from './Envs';
-import { pingTestInit } from '../models/PingTest';
-import { appInit } from '../models/App';
-import { userInit } from '../models/User';
+import { SequelizeModelInitFn } from '../types/SequelizeModelInitFn';
 
 const sequelizeOptions: Options = {
   ...(PRODUCTION && {
@@ -17,15 +15,8 @@ const sequelizeOptions: Options = {
   }
 };
 
-export default function () {
-  const seq = new Sequelize(DB_URI, sequelizeOptions);
-  initTables(seq, pingTestInit, appInit, userInit);
-  return seq.authenticate();
-}
-
-type InitFn = (sequelize: Sequelize) => void;
-
-function initTables(sequelize: Sequelize, ...initFns: InitFn[]) {
-  initFns.forEach((initFn) => initFn(sequelize));
-  return sequelize;
+export default function (...initFns: SequelizeModelInitFn[]) {
+  const s = new Sequelize(DB_URI, sequelizeOptions); 
+  initFns.forEach((initFn) => initFn(s));
+  return s.authenticate();
 }
