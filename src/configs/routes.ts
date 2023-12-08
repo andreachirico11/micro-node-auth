@@ -5,12 +5,20 @@ import { addApp, checkIfAppExistsFromBody, checkIfAppExistsFromParams } from '..
 import { checkAppPasswordRequirements, getRequestBodyValidator } from '../controllers/validators';
 import { appCreation } from '../utils/validators/App';
 import { userAuth, userCreation } from '../utils/validators/User';
-import { addUser, authenticateUser, getUserByNameAndApp, getUserToken, updateUserTokens } from '../controllers/users';
+import {
+  addUser,
+  authenticateUser,
+  getUserByNameAndApp,
+  getUserToken,
+  updateUserTokens,
+} from '../controllers/users';
 import { configRequest } from '../controllers/utils';
+import { adminCreation } from '../utils/validators/Admin';
+import { addAdmin, areAdminActionsEnabled, deleteAdmin } from '../controllers/admins';
 
 const router = Router();
 
-router.all("*", configRequest)
+router.all('*', configRequest);
 
 router.post('/app', getRequestBodyValidator(appCreation), addApp);
 
@@ -23,6 +31,12 @@ router.post(
   updateUserTokens,
   getUserToken
 );
+
+const adminRouter = Router();
+adminRouter.delete('/:adminId', deleteAdmin);
+adminRouter.post('/', getRequestBodyValidator(adminCreation), addAdmin);
+router.use('/admin', areAdminActionsEnabled, adminRouter)
+
 
 router.post(
   '/user/:appId',

@@ -1,4 +1,4 @@
-import { object, number, string, date } from 'yup';
+import { object, number, string } from 'yup';
 
 export const userCreation = object({
   name: string().required(),

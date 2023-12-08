@@ -7,6 +7,7 @@ import {
   Sequelize,
 } from 'sequelize';
 import { IAppId } from './App';
+import { SequelizeModelInitFn } from '../types/SequelizeModelInitFn';
 
 const tableName = 'Users';
 
@@ -93,7 +94,7 @@ export class UserModel
   declare dateResetTokenExp?: Date;
 }
 
-export function userInit(sequelize: Sequelize) {
+export const userInit: SequelizeModelInitFn =  sequelize => {
   UserModel.init(attributes, {
     sequelize,
     tableName,

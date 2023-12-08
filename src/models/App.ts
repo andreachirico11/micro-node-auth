@@ -6,6 +6,7 @@ import {
   ModelAttributes,
   Sequelize,
 } from 'sequelize';
+import { SequelizeModelInitFn } from '../types/SequelizeModelInitFn';
 
 const tableName = 'Apps';
 
@@ -77,7 +78,7 @@ export class AppModel
   declare tokenHoursValidity: number;
 }
 
-export function appInit(sequelize: Sequelize) {
+export const appInit: SequelizeModelInitFn =  sequelize => {
   AppModel.init(attributes, {
     sequelize,
     tableName,

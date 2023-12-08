@@ -15,14 +15,7 @@ import { isHashErrorResponse } from '../helpers/MIcroHashHelper';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { getActualDateWithAddedHours } from '../utils/dates';
 import { NodeTlsHandler } from '../configs/Envs';
-
-const callMicroHash = async (stringToHash: string) => {
-  const hashResp = await HashHelper.hashString(stringToHash);
-    if (isHashErrorResponse(hashResp)) {
-      throw new Error('Micro Hash Helper: ' + hashResp.errors[0]);
-    }
-  return hashResp.payload.hashResult;
-}
+import callMicroHash from '../utils/callMicroHash';
 
 export const addUser: RequestHandler = async ({ params: { appId }, body }: AddUserReq, res) => {
   try {
@@ -53,6 +46,7 @@ export const addUser: RequestHandler = async ({ params: { appId }, body }: AddUs
     NodeTlsHandler.enableTls();
   }
 };
+
 
 export const authenticateUser: RequestHandler = async (req: AuthRequest, res, next) => {
   try {

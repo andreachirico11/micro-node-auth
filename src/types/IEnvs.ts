@@ -7,5 +7,6 @@ export default interface IEnvs extends ParsedVariables {
     BASE_URL: string;
     SYMBOLS_REGEX: string;
     MICRO_HASH_URI: string;
+    ADMIN_CRUDS: boolean;
   }
   
