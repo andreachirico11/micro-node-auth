@@ -15,7 +15,17 @@ export interface RequestWithApikeyHeader<TParams, Tbody, Tbody2> extends Request
     headers:  {api_key: string}
 };
 
-export type AddAppReq = RequestWithTokenHeader<{}, {}, IApp>;
+
+export type AddAppReqBody = Omit<IApp ,"_id"| "apiKey" | "dateAdd">;
+
+export type UpdateAppReqBody = Omit<AddAppReqBody ,"passwordLenght" | "uppercaseLetters" | "symbols" | "numbers" | "symbolsRegex">;
+
+
+// requests
+
+export type AddAppReq = RequestWithTokenHeader<{}, {}, AddAppReqBody>;
+
+export type UpdateAppReq = RequestWithTokenHeader<AppIdParams, {}, UpdateAppReqBody>;
 
 export type AddUserReq = RequestWithApikeyHeader<{}, {}, IUser>;
 

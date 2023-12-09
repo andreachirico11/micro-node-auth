@@ -14,6 +14,7 @@ import {
   RequestWithApikeyHeader,
   RequestWithAppIdInBody,
   RequestWithAppIdInParams,
+  UpdateAppReq,
 } from '../models/RequestTypes';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { Response } from 'express';
@@ -37,6 +38,23 @@ export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
     return new SuccessResponse(res);
   } catch (e) {
     log_error(e, 'Error creating new app');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
+
+export const updateApp: RequestHandler = async ({params: {appId}, body }: UpdateAppReq, res) => {
+  try {
+    log_info('Updating new app with id: ' + appId);
+    const appToUpdate = await AppModel.findByPk(appId);
+    if (!!!appToUpdate) {
+      log_error("No app found")
+      return new NotFoundResp(res, NON_EXISTENT);
+    }
+    appToUpdate.update({...body});
+    log_info('App updated');
+    return new SuccessResponse(res);
+  } catch (e) {
+    log_error(e, 'Error updating new app');
     return new ServerErrorResp(res, INTERNAL_SERVER);
   }
 };
