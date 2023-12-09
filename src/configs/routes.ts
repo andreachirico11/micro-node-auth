@@ -1,16 +1,27 @@
 import { getPing, pingExternalSevices } from '../controllers/ping';
 import { Router } from 'express';
 import { unsupportedUrl } from '../controllers/unsuportedUrl';
-import { addApp, deleteApp, getAppById, getAppIfApikeyIsValid, updateApp } from '../controllers/apps';
+import {
+  addApp,
+  deleteApp,
+  getAppById,
+  getAppIfApikeyIsValid,
+  updateApp,
+} from '../controllers/apps';
 import { checkAppPasswordRequirements, getRequestBodyValidator } from '../controllers/validators';
 import { appCreation, appUpdate } from '../utils/validators/App';
-import { userAuth, userCreation } from '../utils/validators/User';
+import { userAuth, userCreation, userUpdate } from '../utils/validators/User';
 import {
   addUser,
   authenticateUser,
   cascadeDeleteUsers,
-  getUserByNameAndApp,
+  deleteUser,
+  getAllUsers,
+  returnUser,
+  getUserByIdAndContinue,
+  getUserByNameAndAppAndContinue,
   getUserToken,
+  updateUser,
   updateUserTokens,
 } from '../controllers/users';
 import { configRequest } from '../controllers/utils';
@@ -41,7 +52,7 @@ authRouter.post('/admin', getAdminByName, authenticateAdmin, updateAdminToken, g
 authRouter.post(
   '/',
   getAppIfApikeyIsValid,
-  getUserByNameAndApp,
+  getUserByNameAndAppAndContinue,
   authenticateUser,
   updateUserTokens,
   getUserToken
@@ -53,13 +64,19 @@ adminRouter.delete('/:adminId', deleteAdmin);
 adminRouter.post('/', getRequestBodyValidator(adminCreation), addAdmin);
 router.use('/admin', areAdminActionsEnabled, adminRouter);
 
-router.post(
-  '/user',
-  getAppIfApikeyIsValid,
-  getRequestBodyValidator(userCreation),
+const userRouter = Router();
+userRouter.get('/:userId', getUserByIdAndContinue, returnUser);
+userRouter.get('/', getAllUsers);
+userRouter.post('/', getRequestBodyValidator(userCreation), checkAppPasswordRequirements, addUser);
+userRouter.put(
+  '/:userId',
+  getRequestBodyValidator(userUpdate),
+  getUserByIdAndContinue,
   checkAppPasswordRequirements,
-  addUser
+  updateUser
 );
+userRouter.delete('/:userId', getUserByIdAndContinue, deleteUser);
+router.use('/user', getAppIfApikeyIsValid, userRouter);
 
 router.get('/ping/ext', pingExternalSevices);
 router.get('/ping', getPing);

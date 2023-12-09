@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 import { ObjectSchema, ValidationError } from 'yup';
 import { log_error, log_info } from '../utils/log';
 import { ValidationErrResp } from '../types/ApiResponses';
-import { AddUserReq } from '../models/RequestTypes';
+import { AddUserReq, UpdateUserReq } from '../models/RequestTypes';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import generatePasswordSchema from '../utils/validators/Password';
 import { SYMBOLS_REGEX } from '../configs/Envs';
@@ -24,11 +24,15 @@ export const getRequestBodyValidator = (schema: ObjectSchema<any>) => {
   } as RequestHandler;
 };
 
-export const checkAppPasswordRequirements: RequestHandler = async (req: AddUserReq, res, next) => {
+export const checkAppPasswordRequirements: RequestHandler = async (req: AddUserReq | UpdateUserReq, res, next) => {
   try {
     const {
       body: { password },
     } = req;
+    if (!!!password) {
+      log_info("The password does not need to be checked");
+      return next();
+    }
     const foundApp = GetSetRequestProps.getApp(req);
     const { _id, numbers, passwordLenght, symbols, uppercaseLetters, symbolsRegex } = foundApp;
 

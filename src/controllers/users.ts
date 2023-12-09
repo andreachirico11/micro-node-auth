@@ -8,14 +8,91 @@ import {
   UnauthorizedResp,
 } from '../types/ApiResponses';
 import { INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
-import { UserModel } from '../models/User';
-import { AddUserReq, AuthRequest, DeleteAppReq } from '../models/RequestTypes';
+import { IUser, UserModel } from '../models/User';
+import { AddUserReq, AuthRequest, DeleteAppReq, GetUserReq, RequestWithApikeyHeader, RequestWithUserIdInParams } from '../models/RequestTypes';
 import { HashHelper } from '../configs/HashHelper';
 import { isHashErrorResponse } from '../helpers/MIcroHashHelper';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { getActualDateWithAddedHours } from '../utils/dates';
 import { NodeTlsHandler } from '../configs/Envs';
 import callMicroHash from '../utils/callMicroHash';
+
+
+export const getAllUsers: RequestHandler = async (req: RequestWithApikeyHeader<{}, {}, {}>, res) => {
+  try {
+    const {_id: app_id} = GetSetRequestProps.getApp(req);
+    log_info("Retrieving all users for app with id: " + app_id);
+    const users = await UserModel.findAll({where: {app_id}});
+    log_info("Number of users found: " + users.length);
+    return new SuccessResponse(res, {users});
+  } catch (e) {
+    log_error(e, 'Error creating new user');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  } 
+};
+
+export const getUserByNameAndAppAndContinue: RequestHandler = async (req: AuthRequest, res, next) => {
+  try {
+    const {
+      body: { username },
+    } = req;
+    log_info(`Getting User ` + username);
+    const {_id} = GetSetRequestProps.getApp(req);
+    const foundUser = await UserModel.findOne({ where: { name: username, app_id:  _id} });
+    log_info('Success');
+
+    if (!!!foundUser) {
+      log_error("User doesn't exists");
+      return new NotFoundResp(res, NON_EXISTENT);
+    }
+
+    GetSetRequestProps.setUser(req, foundUser);
+    next();
+  } catch (e) {
+    log_error(e, 'Error Getting User');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
+
+export const getUserByIdAndContinue: RequestHandler = async (req: RequestWithUserIdInParams, res, next) => {
+  try {
+    const {params: {userId}} = req;
+    log_info(`Getting User with id: ` + userId);
+    const foundUser = await UserModel.findByPk(userId);
+    if (!!!foundUser) {
+      log_error("User doesn't exists");
+      return new NotFoundResp(res, NON_EXISTENT);
+    }
+    log_info("User Found");
+    GetSetRequestProps.setUser(req, foundUser);
+    next();
+  } catch (e) {
+    log_error(e, 'Error Getting User');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
+
+export const returnUser: RequestHandler = async (req: AuthRequest, res) => {
+  try {
+    const user = GetSetRequestProps.getUser(req);
+    log_info(`Returning ${user.name} tokens`);
+    return new SuccessResponse(res, {user});
+  } catch (e) {
+    log_error(e, 'Error Getting User');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
+
+export const getUserToken: RequestHandler = async (req: AuthRequest, res) => {
+  try {
+    const {name, authToken, dateTokenExp, refreshToken} = GetSetRequestProps.getUser(req);
+    log_info(`Returning ${name} tokens`);
+    return new SuccessResponseWithTokens(res, {authToken, refreshToken, dateTokenExp});
+  } catch (e) {
+    log_error(e, 'Error Getting User');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
 
 export const addUser: RequestHandler = async (req: AddUserReq, res) => {
   try {
@@ -46,6 +123,47 @@ export const addUser: RequestHandler = async (req: AddUserReq, res) => {
   }
 };
 
+export const updateUser: RequestHandler = async (req: AddUserReq, res) => {
+  try {
+    const { password, name } = req.body;
+    const userToBeUpdated = GetSetRequestProps.getUser(req);
+    if (!!name) userToBeUpdated.name = name;
+    if (!!password) {
+      NodeTlsHandler.disableTls();
+      log_info('Call micro-node-crypt hashing service to update password');
+      userToBeUpdated.password = await callMicroHash(password);
+      log_info('Password hashed successfully');
+      userToBeUpdated.datePasswordChange = new Date();
+      userToBeUpdated.resetToken = null;
+      userToBeUpdated.refreshToken = null;
+      userToBeUpdated.authToken = null;
+      userToBeUpdated.dateTokenExp = null;
+      userToBeUpdated.dateRefTokenExp = null;
+    }
+
+    await userToBeUpdated.save();
+    log_info('User  with id <<' + userToBeUpdated._id + '>> updated');
+    return new SuccessResponse(res);
+  } catch (e) {
+    log_error(e, 'Error creating new user');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  } finally {
+    NodeTlsHandler.enableTls();
+  }
+};
+
+export const deleteUser: RequestHandler = async (req: AddUserReq, res) => {
+  try {
+    const userToDelete = GetSetRequestProps.getUser(req);
+    log_info("Deleting user with id: " + userToDelete._id);
+    await userToDelete.destroy();
+    log_info("Deleted");
+    return new SuccessResponse(res);
+  } catch (e) {
+    log_error(e, 'Error creating new user');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  } 
+};
 
 export const authenticateUser: RequestHandler = async (req: AuthRequest, res, next) => {
   try {
@@ -78,29 +196,6 @@ export const authenticateUser: RequestHandler = async (req: AuthRequest, res, ne
   }
 };
 
-export const getUserByNameAndApp: RequestHandler = async (req: AuthRequest, res, next) => {
-  try {
-    const {
-      body: { username },
-    } = req;
-    log_info(`Getting User ` + username);
-    const {_id} = GetSetRequestProps.getApp(req);
-    const foundUser = await UserModel.findOne({ where: { name: username, app_id:  _id} });
-    log_info('Success');
-
-    if (!!!foundUser) {
-      log_error("User doesn't exists");
-      return new NotFoundResp(res, NON_EXISTENT);
-    }
-
-    GetSetRequestProps.setUser(req, foundUser);
-    next();
-  } catch (e) {
-    log_error(e, 'Error Getting User');
-    return new ServerErrorResp(res, INTERNAL_SERVER);
-  }
-};
-
 export const updateUserTokens: RequestHandler = async (req, res, next) => {
   try {
     const user = GetSetRequestProps.getUser(req), {tokenHoursValidity} = GetSetRequestProps.getApp(req);
@@ -121,17 +216,6 @@ export const updateUserTokens: RequestHandler = async (req, res, next) => {
     next();
   } catch (e) {
     log_error(e, 'Error updating user with new tokens');
-    return new ServerErrorResp(res, INTERNAL_SERVER);
-  }
-};
-
-export const getUserToken: RequestHandler = async (req: AuthRequest, res) => {
-  try {
-    const {name, authToken, dateTokenExp, refreshToken} = GetSetRequestProps.getUser(req);
-    log_info(`Returning ${name} tokens`);
-    return new SuccessResponseWithTokens(res, {authToken, refreshToken, dateTokenExp});
-  } catch (e) {
-    log_error(e, 'Error Getting User');
     return new ServerErrorResp(res, INTERNAL_SERVER);
   }
 };

@@ -45,7 +45,7 @@ export const deleteAdmin: RequestHandler = async (
   res
 ) => {
   try {
-    log_info(addAdmin, 'Creating new admin with data: ');
+    log_info('Deleting admin with id: ' + _id);
     const adminToDelete = await AdminModel.findOne({ where: { _id } });
     if (!!!adminToDelete) {
       log_error("This Admin doesn't exists");
