@@ -11,6 +11,7 @@ import {
 import { INTERNAL_SERVER, MISSING_PARAM, NON_EXISTENT, UNAUTHORIZED } from '../types/ErrorCodes';
 import {
   AddAppReq,
+  DeleteAppReq,
   RequestWithApikeyHeader,
   RequestWithAppIdInBody,
   RequestWithAppIdInParams,
@@ -20,6 +21,25 @@ import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { Response } from 'express';
 import { isHashErrorResponse } from '../helpers/MIcroHashHelper';
 import { HashHelper } from '../configs/HashHelper';
+
+
+export const getAppById: RequestHandler = async (req: RequestWithAppIdInParams, res, next) => {
+  try {
+    const {params: {appId} } = req;
+    log_info('Getting  app with id: ' + appId);
+    const appToUpdate = await AppModel.findByPk(appId);
+    if (!!!appToUpdate) {
+      log_error("No app found")
+      return new NotFoundResp(res, NON_EXISTENT);
+    }
+    log_info('Retrieved app with id: ' + appId);
+    GetSetRequestProps.setApp(req, appToUpdate);
+    next();
+  } catch (e) {
+    log_error(e, 'Error updating new app');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
 
 export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   try {
@@ -42,19 +62,28 @@ export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   }
 };
 
-export const updateApp: RequestHandler = async ({params: {appId}, body }: UpdateAppReq, res) => {
+export const updateApp: RequestHandler = async (req: UpdateAppReq, res) => {
   try {
-    log_info('Updating new app with id: ' + appId);
-    const appToUpdate = await AppModel.findByPk(appId);
-    if (!!!appToUpdate) {
-      log_error("No app found")
-      return new NotFoundResp(res, NON_EXISTENT);
-    }
-    appToUpdate.update({...body});
+    const appToUpdate = GetSetRequestProps.getApp(req);
+    log_info('Updating new app with id: ' + appToUpdate._id);
+    await appToUpdate.update({...req.body});
     log_info('App updated');
     return new SuccessResponse(res);
   } catch (e) {
     log_error(e, 'Error updating new app');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
+
+export const deleteApp: RequestHandler = async (req: DeleteAppReq, res) => {
+  try {
+    const appToDelete = GetSetRequestProps.getApp(req);
+    log_info('Deleting app with id: ' + appToDelete._id);
+    await appToDelete.destroy();
+    log_info('App destroyed');
+    return new SuccessResponse(res);
+  } catch (e) {
+    log_error(e, 'Error deleting app');
     return new ServerErrorResp(res, INTERNAL_SERVER);
   }
 };

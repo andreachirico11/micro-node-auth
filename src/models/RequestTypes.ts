@@ -22,10 +22,13 @@ export type UpdateAppReqBody = Omit<AddAppReqBody ,"passwordLenght" | "uppercase
 
 
 // requests
+export type RequestWithAppIdParams = Request<AppIdParams, {}, any>;
 
 export type AddAppReq = RequestWithTokenHeader<{}, {}, AddAppReqBody>;
 
 export type UpdateAppReq = RequestWithTokenHeader<AppIdParams, {}, UpdateAppReqBody>;
+
+export type DeleteAppReq = RequestWithTokenHeader<AppIdParams, {}, {}>;
 
 export type AddUserReq = RequestWithApikeyHeader<{}, {}, IUser>;
 

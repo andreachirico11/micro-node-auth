@@ -9,7 +9,7 @@ import {
 } from '../types/ApiResponses';
 import { INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
 import { UserModel } from '../models/User';
-import { AddUserReq, AuthRequest } from '../models/RequestTypes';
+import { AddUserReq, AuthRequest, DeleteAppReq } from '../models/RequestTypes';
 import { HashHelper } from '../configs/HashHelper';
 import { isHashErrorResponse } from '../helpers/MIcroHashHelper';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
@@ -132,6 +132,19 @@ export const getUserToken: RequestHandler = async (req: AuthRequest, res) => {
     return new SuccessResponseWithTokens(res, {authToken, refreshToken, dateTokenExp});
   } catch (e) {
     log_error(e, 'Error Getting User');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
+
+export const cascadeDeleteUsers: RequestHandler = async (req: DeleteAppReq, res, next) => {
+  try {
+    const {params: {appId: app_id}} = req;
+    log_info("Deleting all user for the app with id: " + app_id);
+    const numOfDeleted = await UserModel.destroy({where: {app_id}});
+    log_info("Deleted " + numOfDeleted + " users");
+    next();
+  } catch (e) {
+    log_error(e, 'Error updating user with new tokens');
     return new ServerErrorResp(res, INTERNAL_SERVER);
   }
 };
