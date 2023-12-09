@@ -1,7 +1,7 @@
 import { getPing, pingExternalSevices } from '../controllers/ping';
 import { Router } from 'express';
 import { unsupportedUrl } from '../controllers/unsuportedUrl';
-import { addApp, checkIfAppExistsFromBody, checkIfAppExistsFromParams } from '../controllers/apps';
+import { addApp, checkIfAppExistsFromBody, checkIfAppExistsFromParams, getAppIfApikeyIsValid } from '../controllers/apps';
 import { checkAppPasswordRequirements, getRequestBodyValidator } from '../controllers/validators';
 import { appCreation } from '../utils/validators/App';
 import { userAuth, userCreation } from '../utils/validators/User';
@@ -27,7 +27,7 @@ const authRouter = Router();
 authRouter.post('/admin', getAdminByName, authenticateAdmin, updateAdminToken, getAdminToken);
 authRouter.post(
   '/',
-  checkIfAppExistsFromBody,
+  getAppIfApikeyIsValid,
   getUserByNameAndApp,
   authenticateUser,
   updateUserTokens,
@@ -41,9 +41,9 @@ adminRouter.post('/', getRequestBodyValidator(adminCreation), addAdmin);
 router.use('/admin', areAdminActionsEnabled, adminRouter);
 
 router.post(
-  '/user/:appId',
+  '/user',
+  getAppIfApikeyIsValid,
   getRequestBodyValidator(userCreation),
-  checkIfAppExistsFromParams,
   checkAppPasswordRequirements,
   addUser
 );

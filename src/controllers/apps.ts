@@ -5,17 +5,19 @@ import {
   NotFoundResp,
   ServerErrorResp,
   SuccessResponse,
+  UnauthorizedResp,
   ValidationErrResp,
 } from '../types/ApiResponses';
-import { INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
+import { INTERNAL_SERVER, MISSING_PARAM, NON_EXISTENT, UNAUTHORIZED } from '../types/ErrorCodes';
 import {
   AddAppReq,
+  RequestWithApikeyHeader,
   RequestWithAppIdInBody,
   RequestWithAppIdInParams,
 } from '../models/RequestTypes';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { Response } from 'express';
-import { MicroHashHelper, isHashErrorResponse } from '../helpers/MIcroHashHelper';
+import { isHashErrorResponse } from '../helpers/MIcroHashHelper';
 import { HashHelper } from '../configs/HashHelper';
 
 export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
@@ -26,13 +28,42 @@ export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
     if (isHashErrorResponse(keyResponse)) {
       throw new Error("Micro Hash Helper can't provide a valid api key");
     }
-    const {payload: {key: apiKey}} = keyResponse;
+    const {
+      payload: { key: apiKey },
+    } = keyResponse;
     log_info('Key Generated: ' + apiKey);
-    await AppModel.create({ ...body, dateAdd: new Date(), apiKey});
+    await AppModel.create({ ...body, dateAdd: new Date(), apiKey });
     log_info('Success');
     return new SuccessResponse(res);
   } catch (e) {
     log_error(e, 'Error creating new app');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
+
+export const getAppIfApikeyIsValid: RequestHandler = async (
+  req: RequestWithApikeyHeader<any, any, any>,
+  res,
+  next
+) => {
+  try {
+    const {
+      headers: { api_key: apiKey },
+    } = req;
+    if (!!!apiKey) {
+      log_error('The key is missing');
+      return new UnauthorizedResp(res, 'The key is missing');
+    }
+    const linkedApp = await AppModel.findOne({ where: { apiKey } });
+    if (!!!linkedApp) {
+      log_error('No app is associated with this api key');
+      return new NotFoundResp(res, NON_EXISTENT);
+    }
+    log_info('Found app with name << ' + linkedApp.name + ' >>');
+    GetSetRequestProps.setApp(req, linkedApp);
+    next();
+  } catch (e) {
+    log_error(e, 'Error using api key');
     return new ServerErrorResp(res, INTERNAL_SERVER);
   }
 };

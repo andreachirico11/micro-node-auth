@@ -11,15 +11,19 @@ export interface RequestWithTokenHeader<TParams, Tbody, Tbody2> extends Request<
     headers:  {admintoken: string}
 };
 
+export interface RequestWithApikeyHeader<TParams, Tbody, Tbody2> extends Request<TParams, Tbody, Tbody2> {
+    headers:  {api_key: string}
+};
+
 export type AddAppReq = RequestWithTokenHeader<{}, {}, IApp>;
 
-export type AddUserReq = Request<AppIdParams, {}, IUser>;
+export type AddUserReq = RequestWithApikeyHeader<{}, {}, IUser>;
 
 export type AddAdminReq = Request<{}, {}, IAdmin>;
 
 export type DeleteAdminReq = Request<AdminIdParams, {}, {}>;
 
-export type AuthRequest = Request<any, {}, IAuthUser>;
+export type AuthRequest = RequestWithApikeyHeader<{}, {}, IAuthUser>;
 
 export type RequestWithAppIdInParams = Request<AppIdParams, {}, any>;
 

@@ -17,11 +17,10 @@ import { getActualDateWithAddedHours } from '../utils/dates';
 import { NodeTlsHandler } from '../configs/Envs';
 import callMicroHash from '../utils/callMicroHash';
 
-export const addUser: RequestHandler = async ({ params: { appId }, body }: AddUserReq, res) => {
+export const addUser: RequestHandler = async (req: AddUserReq, res) => {
   try {
-    const app_id = Number(appId);
-
-    const { password, ...otherProps } = body;
+    const { password, ...otherProps } = req.body;
+    const {_id: app_id} = GetSetRequestProps.getApp(req);
 
     NodeTlsHandler.disableTls();
     log_info('Call micro-node-crypt hashing service');

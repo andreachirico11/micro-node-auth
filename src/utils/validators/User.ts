@@ -7,6 +7,5 @@ export const userCreation = object({
 
 export const userAuth = object({
   username: string().required(),
-  password: string().required(),
-  appId: number(),
+  password: string().required()
 }).required();
