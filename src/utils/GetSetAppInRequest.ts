@@ -3,7 +3,7 @@ import { AppModel } from '../models/App';
 import { UserModel } from '../models/User';
 import { AdminModel } from '../models/Admin';
 
-const APP = "foundApp", USER = "foundUser", ADMIN = "foundAdmin", CLIENT_IP = "client_ip", SKIP_UPDATE =  "skipRefTkUpdate";
+const APP = "foundApp", USER = "foundUser", ADMIN = "foundAdmin", CLIENT_IP = "client_ip", SKIP_UPDATE =  "skipRefTkUpdate", RESET_TOKEN = "resetToken";
 
 export class GetSetRequestProps {
     static getApp(req: Request) {
@@ -45,5 +45,18 @@ export class GetSetRequestProps {
 
     static setetSkipRefTkUpdate(req: Request, skip: boolean) {
         req[SKIP_UPDATE]  = skip;
+    }
+
+    static isInResetTokenMode(req: Request) {
+        return req[RESET_TOKEN] || false;
+    }
+
+    static setIsInResetTokenMode(req: Request) {
+        req[RESET_TOKEN]  = true;
+    }
+
+    static resetFlags(req: Request) {
+        req[RESET_TOKEN] = false;
+        req[SKIP_UPDATE]  = false;
     }
 }

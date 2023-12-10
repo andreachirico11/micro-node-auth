@@ -2,10 +2,9 @@ import { RequestHandler } from 'express';
 import { ObjectSchema, ValidationError } from 'yup';
 import { log_error, log_info } from '../utils/log';
 import { ValidationErrResp } from '../types/ApiResponses';
-import { AddUserReq, UpdateUserReq } from '../models/RequestTypes';
+import { AddUserReq, ChangePasswordRequest, UpdateUserReq } from '../models/RequestTypes';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import generatePasswordSchema from '../utils/validators/Password';
-import { SYMBOLS_REGEX } from '../configs/Envs';
 
 export const getRequestBodyValidator = (schema: ObjectSchema<any>) => {
   return function ({ body }, res, next) {
@@ -24,11 +23,8 @@ export const getRequestBodyValidator = (schema: ObjectSchema<any>) => {
   } as RequestHandler;
 };
 
-export const checkAppPasswordRequirements: RequestHandler = async (req: AddUserReq | UpdateUserReq, res, next) => {
+const checkAppPasswordRequirements = async (password: string, req: ChangePasswordRequest | AddUserReq | UpdateUserReq, res, next) => {
   try {
-    const {
-      body: { password },
-    } = req;
     if (!!!password) {
       log_info("The password does not need to be checked");
       return next();
@@ -46,7 +42,7 @@ export const checkAppPasswordRequirements: RequestHandler = async (req: AddUserR
       numbers,
       symbols,
       uppercaseLetters,
-      SYMBOLS_REGEX
+      symbolsRegex
     ).validateSync(password);
     log_info('Password is valid');
     
@@ -61,4 +57,18 @@ export const checkAppPasswordRequirements: RequestHandler = async (req: AddUserR
     log_error(message);
     new ValidationErrResp(res, [message]);
   }
+}
+
+export const checkAppPasswordRequirementsForPasswordChange: RequestHandler = async (req: ChangePasswordRequest, res, next) => {
+  const {
+    body: { newPassword },
+  } = req;
+  return checkAppPasswordRequirements(newPassword, req, res, next);
+};
+
+export const checkAppPasswordRequirementsForNewUser: RequestHandler = async (req: AddUserReq | UpdateUserReq, res, next) => {
+    const {
+      body: { password },
+    } = req;
+    return checkAppPasswordRequirements(password, req, res, next);
 };

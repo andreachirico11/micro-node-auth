@@ -7,10 +7,15 @@ export const userCreation = object({
 
 export const userUpdate = object({
   name: string(),
-  password: string(),
 }).required();
 
 export const userAuth = object({
   username: string().required(),
   password: string().required()
+}).required();
+
+export const userPasswordChange = object({
+  username: string().required(),
+  password: string().required(),
+  newPassword: string().required(),
 }).required();

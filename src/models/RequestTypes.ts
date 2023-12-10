@@ -50,7 +50,11 @@ export type UpdateUserReq = RequestWithCustomHeader<{}, {}, UpdateUserReqBody, H
 
 export type AuthRequest = RequestWithCustomHeader<{}, {}, IAuthUser, HeaderApiKey>;
 
+export type ChangePasswordRequest = RequestWithCustomHeader<{}, {}, IAuthUser & {newPassword: string}, HeaderApiKey>;
+
 export type AuthCheckRequest = RequestWithCustomHeader<{}, {}, IAuthUser, HeaderApiKey & HeaderAuthorization>;
+
+export type ResetTokenRequest = RequestWithCustomHeader<{}, {}, {}, HeaderApiKey & HeaderAuthorization>;
 
 export type AddAdminReq = Request<{}, {}, IAdmin>;
 
