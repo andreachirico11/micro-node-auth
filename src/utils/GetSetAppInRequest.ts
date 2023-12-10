@@ -3,7 +3,7 @@ import { AppModel } from '../models/App';
 import { UserModel } from '../models/User';
 import { AdminModel } from '../models/Admin';
 
-const APP = "foundApp", USER = "foundUser", ADMIN = "foundAdmin", CLIENT_IP = "client_ip";
+const APP = "foundApp", USER = "foundUser", ADMIN = "foundAdmin", CLIENT_IP = "client_ip", SKIP_UPDATE =  "skipRefTkUpdate";
 
 export class GetSetRequestProps {
     static getApp(req: Request) {
@@ -37,5 +37,13 @@ export class GetSetRequestProps {
 
     static setClientIp(req: Request, ip: string) {
         req[CLIENT_IP] = ip;
+    }
+
+    static getSkipRefTkUpdate(req: Request) {
+        return req[SKIP_UPDATE] || false;
+    }
+
+    static setetSkipRefTkUpdate(req: Request, skip: boolean) {
+        req[SKIP_UPDATE]  = skip;
     }
 }

@@ -3,22 +3,25 @@ import { log_error, log_info } from '../utils/log';
 import {
   NotFoundResp,
   ServerErrorResp,
-  SuccessResponse,
-  SuccessResponseWithTokens,
-  UnauthorizedResp,
+  SuccessResponse, UnauthorizedResp
 } from '../types/ApiResponses';
 import { INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
-import { IUser, UserModel } from '../models/User';
-import { AddUserReq, AuthRequest, DeleteAppReq, GetUserReq, RequestWithApikeyHeader, RequestWithUserIdInParams } from '../models/RequestTypes';
+import { UserModel } from '../models/User';
+import { AddUserReq, AuthCheckRequest, AuthRequest, DeleteAppReq, HeaderApiKey, RequestWithCustomHeader, RequestWithUserIdInParams } from '../models/RequestTypes';
 import { HashHelper } from '../configs/HashHelper';
 import { isHashErrorResponse } from '../helpers/MIcroHashHelper';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
-import { getActualDateWithAddedHours } from '../utils/dates';
+import { getActualDateWithAddedHours, isDateInThePast } from '../utils/dates';
 import { NodeTlsHandler } from '../configs/Envs';
 import callMicroHash from '../utils/callMicroHash';
+import unbearerTokenString from '../utils/unbearerTokenString';
 
 
-export const getAllUsers: RequestHandler = async (req: RequestWithApikeyHeader<{}, {}, {}>, res) => {
+const generateTokenAndExp = async (baseString: string, hoursValidity: number): Promise<[string, Date]> => {
+  return [await callMicroHash(baseString), getActualDateWithAddedHours(hoursValidity)];
+}
+
+export const getAllUsers: RequestHandler = async (req: RequestWithCustomHeader<any, any, any, HeaderApiKey>, res) => {
   try {
     const {_id: app_id} = GetSetRequestProps.getApp(req);
     log_info("Retrieving all users for app with id: " + app_id);
@@ -85,9 +88,9 @@ export const returnUser: RequestHandler = async (req: AuthRequest, res) => {
 
 export const getUserToken: RequestHandler = async (req: AuthRequest, res) => {
   try {
-    const {name, authToken, dateTokenExp, refreshToken} = GetSetRequestProps.getUser(req);
+    const {name, authToken, dateTokenExp, refreshToken, dateRefTokenExp} = GetSetRequestProps.getUser(req), {refreshToken: appHasRefToken} = GetSetRequestProps.getApp(req);;
     log_info(`Returning ${name} tokens`);
-    return new SuccessResponseWithTokens(res, {authToken, refreshToken, dateTokenExp});
+    return new SuccessResponse(res, {authToken, dateTokenExp, ...appHasRefToken && {refreshToken, dateRefTokenExp}});
   } catch (e) {
     log_error(e, 'Error Getting User');
     return new ServerErrorResp(res, INTERNAL_SERVER);
@@ -165,6 +168,70 @@ export const deleteUser: RequestHandler = async (req: AddUserReq, res) => {
   } 
 };
 
+
+export const cascadeDeleteUsers: RequestHandler = async (req: DeleteAppReq, res, next) => {
+  try {
+    const {params: {appId: app_id}} = req;
+    log_info("Deleting all user for the app with id: " + app_id);
+    const numOfDeleted = await UserModel.destroy({where: {app_id}});
+    log_info("Deleted " + numOfDeleted + " users");
+    next();
+  } catch (e) {
+    log_error(e, 'Error updating user with new tokens');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
+
+export const checkAuthToken: RequestHandler = async (req: AuthCheckRequest, res, next) => {
+  try {
+    const {_id: app_id} = GetSetRequestProps.getApp(req), {headers: {authorization: authToken}} = req;
+    log_info(`Check if token << ${authToken} >> exists and is still valid`);
+    const foundUser = await UserModel.findOne({where: {authToken, app_id}});
+    if (!!!foundUser) {
+      log_error("No user for this token");
+      return new UnauthorizedResp(res, "Invalid token");
+    }
+    if (isDateInThePast(foundUser.dateTokenExp)) {
+      log_error("Token has expired");
+      return new UnauthorizedResp(res, "Token is not valid anymore");
+    }
+    log_info("The token is still valid", `Found User With Name << ${foundUser.name} >>`);
+    return new SuccessResponse(res);
+  } catch (e) {
+    log_error(e, 'Authentication Error');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
+
+export const onRefreshAuthToken: RequestHandler = async (req: AuthCheckRequest, res, next) => {
+  try {
+    const {_id: app_id, refreshToken: isFeatureActivated} = GetSetRequestProps.getApp(req), {headers: {authorization: refreshToken}} = req;
+    if (!isFeatureActivated) {
+      const phrase ="The refresh feature is not activated on this app";
+      log_error(phrase);
+      return new UnauthorizedResp(res, phrase);
+    }
+    log_info(`Check if user with refresh token << ${refreshToken} >> exists`);
+    const foundUser = await UserModel.findOne({where: {refreshToken, app_id}});
+    if (!!!foundUser) {
+      log_error("No user for this token");
+      return new UnauthorizedResp(res, "Invalid token");
+    }
+    const tokenExpDate = new Date(foundUser.dateRefTokenExp);
+    if (isDateInThePast(tokenExpDate)) {
+      log_error("Refresh Token has expired");
+      return new UnauthorizedResp(res, "Refresh Token is not valid anymore");
+    }
+    log_info("The refresh token is still valid", `Found User With Name << ${foundUser.name} >>`);
+    GetSetRequestProps.setUser(req, foundUser);
+    GetSetRequestProps.setetSkipRefTkUpdate(req, true);
+    next();
+  } catch (e) {
+    log_error(e, 'Authentication Error');
+    return new ServerErrorResp(res, INTERNAL_SERVER);
+  }
+};
+
 export const authenticateUser: RequestHandler = async (req: AuthRequest, res, next) => {
   try {
     const app = GetSetRequestProps.getApp(req),
@@ -198,37 +265,21 @@ export const authenticateUser: RequestHandler = async (req: AuthRequest, res, ne
 
 export const updateUserTokens: RequestHandler = async (req, res, next) => {
   try {
-    const user = GetSetRequestProps.getUser(req), {tokenHoursValidity} = GetSetRequestProps.getApp(req);
+    const user = GetSetRequestProps.getUser(req), {tokenHoursValidity, 
+      refreshToken: appHasRefToken} = GetSetRequestProps.getApp(req), 
+      skipRefTkUpdate = GetSetRequestProps.getSkipRefTkUpdate(req),
+      updateRefreshToken = !skipRefTkUpdate && appHasRefToken;
     log_info(`Updating token for the user ${user.name}`);
-
-    log_info('Call micro-node-crypt hashing service');    
-
-    user.authToken = await callMicroHash(user.name);
-    user.dateTokenExp = getActualDateWithAddedHours(tokenHoursValidity);
-    log_info('Auth Token Generated');    
-
-    user.refreshToken = await callMicroHash(user.password);
-    user.dateRefTokenExp = getActualDateWithAddedHours(tokenHoursValidity * 10);
-    log_info('Refresh Token Generated');
-
-    await user.save();
-
+    NodeTlsHandler.disableTls();
+    log_info('Call micro-node-crypt hashing service');
+    const [authToken, dateTokenExp] = await generateTokenAndExp(user.name, tokenHoursValidity);
+    const [refreshToken, dateRefTokenExp] = updateRefreshToken ?  await generateTokenAndExp(user.name, tokenHoursValidity + 24) : [];
+    await user.update({authToken, dateTokenExp, ...updateRefreshToken && {refreshToken, dateRefTokenExp}});
     next();
   } catch (e) {
     log_error(e, 'Error updating user with new tokens');
     return new ServerErrorResp(res, INTERNAL_SERVER);
-  }
-};
-
-export const cascadeDeleteUsers: RequestHandler = async (req: DeleteAppReq, res, next) => {
-  try {
-    const {params: {appId: app_id}} = req;
-    log_info("Deleting all user for the app with id: " + app_id);
-    const numOfDeleted = await UserModel.destroy({where: {app_id}});
-    log_info("Deleted " + numOfDeleted + " users");
-    next();
-  } catch (e) {
-    log_error(e, 'Error updating user with new tokens');
-    return new ServerErrorResp(res, INTERNAL_SERVER);
+  } finally {
+    NodeTlsHandler.enableTls();
   }
 };

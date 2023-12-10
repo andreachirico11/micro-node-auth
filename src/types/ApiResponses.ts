@@ -12,12 +12,6 @@ export class SuccessResponse {
   }
 }
 
-export class SuccessResponseWithTokens {
-    constructor(res: Response, payload: {authToken: string, refreshToken: string, dateTokenExp: Date}) {
-      sender(res, 200, {success: true, payload});
-    }
-  }
-
 abstract class ErrorResponse {
     constructor(res: Response, status: number, errCode: ErrorCodes, errors: string[] = null) {
         sender(res, status, {success: false, errCode, ...errors && {errors}});

@@ -40,6 +40,10 @@ const attributes: ModelAttributes = {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
+  refreshToken: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
   symbolsRegex: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -61,6 +65,7 @@ export interface IApp {
   uppercaseLetters: boolean;
   symbols: boolean;
   numbers: boolean;
+  refreshToken: boolean;
   symbolsRegex?: string;
   tokenHoursValidity?: number;
   apiKey?: string;
@@ -77,6 +82,7 @@ export class AppModel
   declare uppercaseLetters: boolean;
   declare symbols: boolean;
   declare numbers: boolean;
+  declare refreshToken: boolean;
   declare symbolsRegex?: string;
   declare tokenHoursValidity?: number;
   declare apiKey?: string;

@@ -8,13 +8,14 @@ import {
   UnauthorizedResp,
   ValidationErrResp,
 } from '../types/ApiResponses';
-import { INTERNAL_SERVER, MISSING_PARAM, NON_EXISTENT, UNAUTHORIZED } from '../types/ErrorCodes';
+import { INTERNAL_SERVER, NON_EXISTENT } from '../types/ErrorCodes';
 import {
   AddAppReq,
   DeleteAppReq,
-  RequestWithApikeyHeader,
+  HeaderApiKey,
   RequestWithAppIdInBody,
   RequestWithAppIdInParams,
+  RequestWithCustomHeader,
   UpdateAppReq,
 } from '../models/RequestTypes';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
@@ -89,7 +90,7 @@ export const deleteApp: RequestHandler = async (req: DeleteAppReq, res) => {
 };
 
 export const getAppIfApikeyIsValid: RequestHandler = async (
-  req: RequestWithApikeyHeader<any, any, any>,
+  req: RequestWithCustomHeader<any, any, any, HeaderApiKey>,
   res,
   next
 ) => {

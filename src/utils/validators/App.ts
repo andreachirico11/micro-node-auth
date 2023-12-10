@@ -7,6 +7,7 @@ export const appCreation = object({
   uppercaseLetters: boolean().required(),
   symbols: boolean().required(),
   numbers: boolean().required(),
+  refreshToken: boolean().required(),
   tokenHoursValidity: number().required(),
 }).required();
 

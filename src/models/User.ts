@@ -65,8 +65,8 @@ export interface IUser {
   authToken?: string;
   dateTokenExp?: Date;
   app_id?: number;
-  refreshToken: string;
-  dateRefTokenExp: Date;
+  refreshToken?: string;
+  dateRefTokenExp?: Date;
   resetToken?: string;
   dateResetTokenExp?: Date;
 }
@@ -88,8 +88,8 @@ export class UserModel
   declare authToken?: string;
   declare dateTokenExp?: Date;
   declare app_id?: number;
-  declare refreshToken: string;
-  declare dateRefTokenExp: Date;
+  declare refreshToken?: string;
+  declare dateRefTokenExp?: Date;
   declare resetToken?: string;
   declare dateResetTokenExp?: Date;
 }

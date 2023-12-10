@@ -1,6 +1,12 @@
 import { RequestHandler } from 'express';
 import { ADMIN_CRUDS, NodeTlsHandler } from '../configs/Envs';
-import { AddAdminReq, AuthRequest, DeleteAdminReq, RequestWithTokenHeader } from '../models/RequestTypes';
+import {
+  AddAdminReq,
+  AuthRequest,
+  DeleteAdminReq,
+  HeaderAdminToken,
+  RequestWithCustomHeader,
+} from '../models/RequestTypes';
 import {
   SuccessResponse,
   ServerErrorResp,
@@ -148,9 +154,15 @@ export const updateAdminToken: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const isAdminTokenValid: RequestHandler = async (req: RequestWithTokenHeader<any, any, any>, res, next) => {
-    try {
-    const {headers: {admintoken: adminToken}} = req;
+export const isAdminTokenValid: RequestHandler = async (
+  req: RequestWithCustomHeader<any, any, any, HeaderAdminToken>,
+  res,
+  next
+) => {
+  try {
+    const {
+      headers: { admintoken: adminToken },
+    } = req;
     const foundAdmin = await AdminModel.findOne({ where: { adminToken } });
     if (!!!foundAdmin) {
       log_info('Admin Token Invalid');

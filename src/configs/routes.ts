@@ -23,6 +23,8 @@ import {
   getUserToken,
   updateUser,
   updateUserTokens,
+  checkAuthToken,
+  onRefreshAuthToken,
 } from '../controllers/users';
 import { configRequest } from '../controllers/utils';
 import { adminCreation } from '../utils/validators/Admin';
@@ -48,16 +50,32 @@ appRouter.delete('/:appId', getAppById, cascadeDeleteUsers, deleteApp);
 router.use('/app', isAdminTokenValid, appRouter);
 
 const authRouter = Router();
-authRouter.post('/admin', getAdminByName, authenticateAdmin, updateAdminToken, getAdminToken);
+authRouter.post(
+  '/admin',
+  getRequestBodyValidator(userAuth),
+  getAdminByName,
+  authenticateAdmin,
+  updateAdminToken,
+  getAdminToken
+);
+authRouter.get(
+  '/refresh',
+  getAppIfApikeyIsValid,
+  onRefreshAuthToken,
+  updateUserTokens,
+  getUserToken
+);
 authRouter.post(
   '/',
+  getRequestBodyValidator(userAuth),
   getAppIfApikeyIsValid,
   getUserByNameAndAppAndContinue,
   authenticateUser,
   updateUserTokens,
   getUserToken
 );
-router.use('/auth', getRequestBodyValidator(userAuth), authRouter);
+authRouter.get('/', getAppIfApikeyIsValid, checkAuthToken);
+router.use('/auth', authRouter);
 
 const adminRouter = Router();
 adminRouter.delete('/:adminId', deleteAdmin);
