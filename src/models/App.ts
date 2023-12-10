@@ -52,6 +52,14 @@ const attributes: ModelAttributes = {
     type: DataTypes.NUMBER,
     allowNull: false,
   },
+  refreshTokenHoursValidity: {
+    type: DataTypes.NUMBER,
+    allowNull: false,
+  },
+  resetTokenHoursValidity: {
+    type: DataTypes.NUMBER,
+    allowNull: false,
+  },
   apiKey: {
     type: DataTypes.STRING(100),
   },
@@ -68,6 +76,8 @@ export interface IApp {
   refreshToken: boolean;
   symbolsRegex?: string;
   tokenHoursValidity?: number;
+  refreshTokenHoursValidity?: number;
+  resetTokenHoursValidity?: number;
   apiKey?: string;
 }
 
@@ -85,6 +95,8 @@ export class AppModel
   declare refreshToken: boolean;
   declare symbolsRegex?: string;
   declare tokenHoursValidity?: number;
+  declare refreshTokenHoursValidity?: number;
+  declare resetTokenHoursValidity?: number;
   declare apiKey?: string;
 }
 

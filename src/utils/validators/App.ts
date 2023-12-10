@@ -9,9 +9,13 @@ export const appCreation = object({
   numbers: boolean().required(),
   refreshToken: boolean().required(),
   tokenHoursValidity: number().required(),
+  refreshTokenHoursValidity: number().required(),
+  resetTokenHoursValidity: number().required(),
 }).required();
 
 export const appUpdate = object({
   name: string().required(),
   tokenHoursValidity: number().required(),
+  refreshTokenHoursValidity: number().required(),
+  resetTokenHoursValidity: number().required(),
 }).required();
