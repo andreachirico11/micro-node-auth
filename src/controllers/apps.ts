@@ -13,6 +13,8 @@ import {
   AddAppReq,
   DeleteAppReq,
   HeaderApiKey,
+  OnlyApiKeyQUery,
+  ReqWithCustHeaderAndQuery,
   RequestWithAppIdInBody,
   RequestWithAppIdInParams,
   RequestWithCustomHeader,
@@ -22,15 +24,17 @@ import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
 import { Response } from 'express';
 import { isHashErrorResponse } from '../helpers/MIcroHashHelper';
 import { HashHelper } from '../configs/HashHelper';
-
+import { NodeTlsHandler } from '../configs/Envs';
 
 export const getAppById: RequestHandler = async (req: RequestWithAppIdInParams, res, next) => {
   try {
-    const {params: {appId} } = req;
+    const {
+      params: { appId },
+    } = req;
     log_info('Getting  app with id: ' + appId);
     const appToUpdate = await AppModel.findByPk(appId);
     if (!!!appToUpdate) {
-      log_error("No app found")
+      log_error('No app found');
       return new NotFoundResp(res, NON_EXISTENT);
     }
     log_info('Retrieved app with id: ' + appId);
@@ -44,6 +48,7 @@ export const getAppById: RequestHandler = async (req: RequestWithAppIdInParams, 
 
 export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   try {
+    NodeTlsHandler.disableTls();
     log_info(body, 'Creating new app with data: ');
     log_info('Calling external service to get a new api key');
     const keyResponse = await HashHelper.getNewApiKey();
@@ -60,6 +65,8 @@ export const addApp: RequestHandler = async ({ body }: AddAppReq, res) => {
   } catch (e) {
     log_error(e, 'Error creating new app');
     return new ServerErrorResp(res, INTERNAL_SERVER);
+  } finally {
+    NodeTlsHandler.enableTls();
   }
 };
 
@@ -67,7 +74,7 @@ export const updateApp: RequestHandler = async (req: UpdateAppReq, res) => {
   try {
     const appToUpdate = GetSetRequestProps.getApp(req);
     log_info('Updating new app with id: ' + appToUpdate._id);
-    await appToUpdate.update({...req.body});
+    await appToUpdate.update({ ...req.body });
     log_info('App updated');
     return new SuccessResponse(res);
   } catch (e) {
@@ -90,14 +97,16 @@ export const deleteApp: RequestHandler = async (req: DeleteAppReq, res) => {
 };
 
 export const getAppIfApikeyIsValid: RequestHandler = async (
-  req: RequestWithCustomHeader<any, any, any, HeaderApiKey>,
+  req: ReqWithCustHeaderAndQuery<any, any, any, HeaderApiKey, OnlyApiKeyQUery>,
   res,
   next
 ) => {
   try {
     const {
-      headers: { api_key: apiKey },
-    } = req;
+        headers: { api_key: apiKey },
+        query: {only_api_key}
+      } = req,
+      onlyApiKeyFlag = only_api_key === 'true';
     if (!!!apiKey) {
       log_error('The key is missing');
       return new UnauthorizedResp(res, 'The key is missing');
@@ -108,6 +117,15 @@ export const getAppIfApikeyIsValid: RequestHandler = async (
       return new NotFoundResp(res, NON_EXISTENT);
     }
     log_info('Found app with name << ' + linkedApp.name + ' >>');
+
+    if (linkedApp.canCheckWithApiKeyOnly && onlyApiKeyFlag) {
+      log_info(
+        'SUCCESS',
+        'The request ask to check with the api key only and this feature is enabled on this app'
+      );
+      return new SuccessResponse(res);
+    }
+
     GetSetRequestProps.setApp(req, linkedApp);
     next();
   } catch (e) {

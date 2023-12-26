@@ -44,6 +44,10 @@ const attributes: ModelAttributes = {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
+  canCheckWithApiKeyOnly: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
   symbolsRegex: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -74,6 +78,7 @@ export interface IApp {
   symbols: boolean;
   numbers: boolean;
   refreshToken: boolean;
+  canCheckWithApiKeyOnly: boolean;
   symbolsRegex?: string;
   tokenHoursValidity?: number;
   refreshTokenHoursValidity?: number;
@@ -93,6 +98,7 @@ export class AppModel
   declare symbols: boolean;
   declare numbers: boolean;
   declare refreshToken: boolean;
+  declare canCheckWithApiKeyOnly: boolean;
   declare symbolsRegex?: string;
   declare tokenHoursValidity?: number;
   declare refreshTokenHoursValidity?: number;

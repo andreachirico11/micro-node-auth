@@ -8,6 +8,7 @@ export const appCreation = object({
   symbols: boolean().required(),
   numbers: boolean().required(),
   refreshToken: boolean().required(),
+  canCheckWithApiKeyOnly: boolean().required(),
   tokenHoursValidity: number().required(),
   refreshTokenHoursValidity: number().required(),
   resetTokenHoursValidity: number().required(),
