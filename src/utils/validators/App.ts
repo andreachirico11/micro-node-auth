@@ -9,14 +9,14 @@ export const appCreation = object({
   numbers: boolean().required(),
   refreshToken: boolean().required(),
   canCheckWithApiKeyOnly: boolean().required(),
-  tokenHoursValidity: number().required(),
-  refreshTokenHoursValidity: number().required(),
-  resetTokenHoursValidity: number().required(),
+  tokenExpirationMs: number().required(),
+  refreshTokenExpirationMs: number().required(),
+  resetTokeExpirationMs: number().required(),
 }).required();
 
 export const appUpdate = object({
   name: string().required(),
-  tokenHoursValidity: number().required(),
-  refreshTokenHoursValidity: number().required(),
-  resetTokenHoursValidity: number().required(),
+  tokenExpirationMs: number().required(),
+  refreshTokenExpirationMs: number().required(),
+  resetTokeExpirationMs: number().required(),
 }).required();

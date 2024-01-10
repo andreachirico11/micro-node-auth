@@ -10,7 +10,7 @@ import { UserModel } from '../models/User';
 import { UnauthorizedResp, SuccessResponse, ServerErrorResp } from '../types/ApiResponses';
 import { INTERNAL_SERVER } from '../types/ErrorCodes';
 import { GetSetRequestProps } from '../utils/GetSetAppInRequest';
-import { getActualDateWithAddedHours, isDateInThePast } from '../utils/dates';
+import { getActualDateWithAddedMilliseconds, isDateInThePast } from '../utils/dates';
 import { log_info, log_error } from '../utils/log';
 import { NodeTlsHandler } from '../configs/Envs';
 import { HashHelper } from '../configs/HashHelper';
@@ -18,9 +18,9 @@ import callMicroHash from '../utils/callMicroHash';
 
 const generateTokenAndExp = async (
   baseString: string,
-  hoursValidity: number
+  millisecondsValidity: number
 ): Promise<[string, Date]> => {
-  return [await callMicroHash(baseString), getActualDateWithAddedHours(hoursValidity)];
+  return [await callMicroHash(baseString), getActualDateWithAddedMilliseconds(millisecondsValidity)];
 };
 
 export const checkAuthToken: RequestHandler = async (req: AuthCheckRequest, res, next) => {
@@ -71,7 +71,7 @@ export const onRefreshAuthToken: RequestHandler = async (req: AuthCheckRequest, 
     }
     log_info('The token is still valid', `Found User With Name << ${foundUser.name} >>`);
     GetSetRequestProps.setUser(req, foundUser);
-    GetSetRequestProps.setetSkipRefTkUpdate(req, true);
+    // GetSetRequestProps.setetSkipRefTkUpdate(req, true);
     next();
   } catch (e) {
     log_error(e, 'Authentication Error');
@@ -165,9 +165,9 @@ export const updateUserTokens: RequestHandler = async (req, res, next) => {
   try {
     const user = GetSetRequestProps.getUser(req),
       {
-        tokenHoursValidity,
-        refreshTokenHoursValidity,
-        resetTokenHoursValidity,
+        tokenExpirationMs,
+        refreshTokenExpirationMs,
+        resetTokeExpirationMs,
         refreshToken: appHasRefToken,
       } = GetSetRequestProps.getApp(req),
       skipRefTkUpdate = GetSetRequestProps.getSkipRefTkUpdate(req),
@@ -180,13 +180,13 @@ export const updateUserTokens: RequestHandler = async (req, res, next) => {
     if (GetSetRequestProps.isInResetTokenMode(req)) {
       const [resetToken, dateResetTokenExp] = await generateTokenAndExp(
         user.name,
-        resetTokenHoursValidity
+        resetTokeExpirationMs
       );
       await user.update({ resetToken, dateResetTokenExp });
     } else {
-      const [authToken, dateTokenExp] = await generateTokenAndExp(user.name, tokenHoursValidity);
+      const [authToken, dateTokenExp] = await generateTokenAndExp(user.name, tokenExpirationMs);
       const [refreshToken, dateRefTokenExp] = updateRefreshToken
-        ? await generateTokenAndExp(user.name, refreshTokenHoursValidity)
+        ? await generateTokenAndExp(user.name, refreshTokenExpirationMs)
         : [];
       await user.update({
         authToken,

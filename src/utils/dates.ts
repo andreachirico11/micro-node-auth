@@ -2,8 +2,8 @@ export function getSqlDate(date: Date) {
   return date.toISOString().split('T').join(' ').split('Z').join('');
 }
 
-export function getActualDateWithAddedHours(hoursTOAdd: number) {
-  return new Date(new Date().getTime() + hourToMs(hoursTOAdd));
+export function getActualDateWithAddedMilliseconds(ms: number) {
+  return new Date(new Date().getTime() + ms);
 }
 
 export function hourToMs(hour: number) {
